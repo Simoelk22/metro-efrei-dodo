@@ -112,3 +112,73 @@ def tracer_reseau(graphe, positions_noms, chemin=None, acpm_aretes=None):
     )
 
     return fig
+
+
+def tracer_heatmap(graphe, positions_noms):
+    """
+    Heatmap des stations : taille et couleur proportionnelles au degré (nombre de connexions).
+    """
+    pos = _positions_par_num(graphe, positions_noms)
+
+    # Calcul du degré de chaque station
+    degres = {num: len(graphe.adjacence[num]) for num in graphe.sommets}
+    max_degre = max(degres.values()) if degres else 1
+
+    sx, sy, textes, tailles, couleurs, infos = [], [], [], [], [], []
+    for num in graphe.sommets:
+        if num not in pos:
+            continue
+        x, y = pos[num]
+        d = degres[num]
+        sx.append(x)
+        sy.append(-y)
+        textes.append(graphe.noms[num])
+        tailles.append(6 + d * 4)
+        couleurs.append(d)
+        infos.append(f"{graphe.noms[num]}<br>Ligne {graphe.lignes[num]}<br>{d} connexion(s)")
+
+    fig = go.Figure()
+
+    # Arêtes en fond, très discrètes
+    for u in graphe.adjacence:
+        for v, _ in graphe.adjacence[u]:
+            if u < v and u in pos and v in pos:
+                x0, y0 = pos[u]
+                x1, y1 = pos[v]
+                fig.add_trace(go.Scatter(
+                    x=[x0, x1, None], y=[-y0, -y1, None],
+                    mode="lines",
+                    line=dict(color="rgba(150,150,180,0.15)", width=1),
+                    hoverinfo="none",
+                    showlegend=False,
+                ))
+
+    # Noeuds avec heatmap
+    fig.add_trace(go.Scatter(
+        x=sx, y=sy,
+        mode="markers",
+        marker=dict(
+            size=tailles,
+            color=couleurs,
+            colorscale="Plasma",
+            showscale=True,
+            colorbar=dict(
+                title=dict(text="Connexions", side="right"),
+                tickfont=dict(size=11),
+            ),
+            line=dict(width=0.5, color="white"),
+        ),
+        text=infos,
+        hovertemplate="%{text}<extra></extra>",
+        showlegend=False,
+    ))
+
+    fig.update_layout(
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        plot_bgcolor="#f8f8fc",
+        margin=dict(l=0, r=0, t=0, b=0),
+        height=650,
+    )
+
+    return fig, degres
