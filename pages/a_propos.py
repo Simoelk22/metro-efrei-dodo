@@ -1,132 +1,13 @@
-import streamlit as st
 import os
+import sys
 
-st.set_page_config(
-    page_title="À propos — Metro Efrei Dodo",
-    page_icon="M",
-    layout="centered",
-)
+import streamlit as st
 
-# ── CSS personnalisé ──────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-st.markdown("""
-<style>
-    /* Fond global dégradé discret */
-    .stApp {
-        background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
-        color: #e8e8f0;
-    }
-
-    /* Carte principale */
-    .card {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.09);
-        border-radius: 18px;
-        padding: 2.2rem 2.6rem;
-        margin-bottom: 1.6rem;
-        backdrop-filter: blur(8px);
-    }
-
-    /* Photo de profil */
-    .profile-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-    .profile-img {
-        width: 148px;
-        height: 148px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #5c6bc0;
-        box-shadow: 0 0 28px rgba(92,107,192,0.45);
-    }
-    .profile-placeholder {
-        width: 148px;
-        height: 148px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #5c6bc0, #7986cb);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 3.2rem;
-        border: 3px solid #5c6bc0;
-        box-shadow: 0 0 28px rgba(92,107,192,0.45);
-    }
-    .nom {
-        font-size: 1.9rem;
-        font-weight: 700;
-        color: #ffffff;
-        letter-spacing: 0.5px;
-        text-align: center;
-    }
-    .badge {
-        display: inline-block;
-        background: rgba(92,107,192,0.22);
-        border: 1px solid #5c6bc0;
-        color: #9fa8da;
-        border-radius: 20px;
-        padding: 0.25rem 0.9rem;
-        font-size: 0.85rem;
-        margin: 0.2rem;
-        font-weight: 500;
-    }
-    .section-title {
-        color: #9fa8da;
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 1.8px;
-        text-transform: uppercase;
-        margin-bottom: 0.7rem;
-        border-bottom: 1px solid rgba(159,168,218,0.18);
-        padding-bottom: 0.4rem;
-    }
-    .body-text {
-        color: #c8cce8;
-        font-size: 0.97rem;
-        line-height: 1.75;
-    }
-    .skill-bar-bg {
-        background: rgba(255,255,255,0.07);
-        border-radius: 6px;
-        height: 7px;
-        margin-top: 4px;
-        margin-bottom: 10px;
-    }
-    .skill-bar-fill {
-        height: 7px;
-        border-radius: 6px;
-        background: linear-gradient(90deg, #5c6bc0, #9c27b0);
-    }
-    .contact-link {
-        color: #9fa8da;
-        text-decoration: none;
-        font-size: 0.93rem;
-    }
-    .contact-link:hover { color: #ffffff; }
-    .algo-tag {
-        display: inline-block;
-        background: rgba(156,39,176,0.18);
-        border: 1px solid rgba(156,39,176,0.4);
-        color: #ce93d8;
-        border-radius: 8px;
-        padding: 0.2rem 0.7rem;
-        font-size: 0.82rem;
-        margin: 0.2rem 0.1rem;
-    }
-    .quote {
-        border-left: 3px solid #5c6bc0;
-        padding: 0.5rem 1.1rem;
-        color: #a0a4c8;
-        font-style: italic;
-        font-size: 0.95rem;
-        margin: 0.8rem 0;
-    }
-</style>
-""", unsafe_allow_html=True)
-
+# Le thème global (signalétique RATP claire) fournit déjà toutes les classes
+# utilisées ici (.card, .profile-img, .badge, .section-title, .body-text,
+# .skill-bar-*, .contact-link, .algo-tag, .quote) — voir src/theme.py.
 
 # ── En-tête avec photo ────────────────────────────────────────────────────────
 
@@ -162,8 +43,8 @@ st.markdown('<div class="card">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Qui suis-je</div>', unsafe_allow_html=True)
 st.markdown("""
 <div class="body-text">
-Bonjour, je m'appelle <strong style="color:#ffffff;">Mohammed El Karchal</strong>.
-Je suis étudiant à l'<strong style="color:#ffffff;">EFREI Paris</strong>, école d'ingénieurs
+Bonjour, je m'appelle <strong style="color:#0a1f44;">Mohammed El Karchal</strong>.
+Je suis étudiant à l'<strong style="color:#0a1f44;">EFREI Paris</strong>, école d'ingénieurs
 spécialisée en informatique. Ce projet est né dans le cadre du MasterCamp, un sprint
 intensif où chaque équipe conçoit et code une application complète en quelques jours —
 genre hackathon, mais avec des vraies contraintes académiques en plus.
@@ -184,7 +65,7 @@ st.markdown('<div class="card">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Metro Efrei Dodo — le projet</div>', unsafe_allow_html=True)
 st.markdown("""
 <div class="body-text">
-L'application modélise le réseau du métro parisien sous forme de <strong style="color:#ffffff;">graphe pondéré</strong>
+L'application modélise le réseau du métro parisien sous forme de <strong style="color:#0a1f44;">graphe pondéré</strong>
 (les poids = temps de trajet en secondes). À partir de là, trois grandes fonctionnalités :
 </div>
 <br>
@@ -198,7 +79,7 @@ cols_algos = [
 ]
 for nom, desc in cols_algos:
     st.markdown(
-        f'<span class="algo-tag">{nom}</span> <span style="color:#9da0c0;font-size:0.88rem;">{desc}</span><br>',
+        f'<span class="algo-tag">{nom}</span> <span style="color:#46527a;font-size:0.88rem;">{desc}</span><br>',
         unsafe_allow_html=True,
     )
 
@@ -226,7 +107,7 @@ skills = [
 ]
 for label, pct in skills:
     st.markdown(f"""
-    <div style="display:flex; justify-content:space-between; color:#c0c4e0; font-size:0.88rem; margin-top:0.5rem;">
+    <div style="display:flex; justify-content:space-between; color:#46527a; font-size:0.88rem; margin-top:0.5rem;">
         <span>{label}</span><span>{pct}%</span>
     </div>
     <div class="skill-bar-bg">
@@ -261,11 +142,11 @@ st.markdown('<div class="card">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Contact</div>', unsafe_allow_html=True)
 st.markdown("""
 <div style="display:flex; flex-direction:column; gap:0.5rem;">
-    <span style="color:#c0c4e0; font-size:0.93rem;">
-        École &nbsp;·&nbsp; <strong style="color:#ffffff;">EFREI Paris</strong> — Villejuif
+    <span style="color:#46527a; font-size:0.93rem;">
+        École &nbsp;·&nbsp; <strong style="color:#0a1f44;">EFREI Paris</strong> — Villejuif
     </span>
-    <span style="color:#c0c4e0; font-size:0.93rem;">
-        Promo &nbsp;·&nbsp; <strong style="color:#ffffff;">MasterCamp 2025-2026</strong>
+    <span style="color:#46527a; font-size:0.93rem;">
+        Promo &nbsp;·&nbsp; <strong style="color:#0a1f44;">MasterCamp 2025-2026</strong>
     </span>
 </div>
 """, unsafe_allow_html=True)
@@ -291,8 +172,8 @@ for titre, tag, desc in fonctionnalites:
             <span class="algo-tag">{tag}</span>
         </div>
         <div>
-            <div style="color:#ffffff;font-weight:600;font-size:0.93rem;">{titre}</div>
-            <div style="color:#9da0c0;font-size:0.87rem;margin-top:0.15rem;">{desc}</div>
+            <div style="color:#0a1f44;font-weight:600;font-size:0.93rem;">{titre}</div>
+            <div style="color:#46527a;font-size:0.87rem;margin-top:0.15rem;">{desc}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -314,7 +195,7 @@ st.markdown("""
 </div>
 <div class="body-text" style="font-size:0.9rem;">
 Les algorithmes principaux (Dijkstra, A*, Prim, Kruskal, BFS) sont codés
-<strong style="color:#fff">from scratch</strong> sans librairie externe —
+<strong style="color:#0a1f44">from scratch</strong> sans librairie externe —
 pour comprendre ce qu'on fait, pas juste appeler une fonction noire.
 NetworkX est uniquement utilisé dans le benchmark pour comparer les performances.
 </div>
@@ -322,7 +203,7 @@ NetworkX est uniquement utilisé dans le benchmark pour comparer les performance
 st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown(
-    '<div style="text-align:center; color:rgba(150,150,180,0.45); font-size:0.78rem; margin-top:2rem;">'
+    '<div style="text-align:center; color:#8b95b4; font-size:0.78rem; margin-top:2rem; font-weight:600;">'
     'Metro Efrei Dodo · Mohammed El Karchal · EFREI Paris · 2026'
     '</div>',
     unsafe_allow_html=True
