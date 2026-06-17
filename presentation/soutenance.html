@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Metro EFREI Dodo — Soutenance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0:#05080f;
+    --bg-1:#0a1628;
+    --bg-2:#0f1e36;
+    --ink-0:#f4f7fb;
+    --ink-1:#cad4e3;
+    --ink-2:#7c8aa3;
+    --ink-3:#3e4a63;
+    --accent:#00d9ff;
+    --accent-2:#7c5cff;
+    --accent-3:#ffd166;
+    --good:#3ddc97;
+    --bad:#ff6b6b;
+    --line:rgba(255,255,255,.08);
+    --line-strong:rgba(255,255,255,.16);
+    --glass:rgba(255,255,255,.03);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:var(--bg-0);
+    color:var(--ink-0);
+    -webkit-font-smoothing:antialiased;
+    font-feature-settings:"ss01","cv11";
+    letter-spacing:-0.01em;
+  }
+
+  /* ── Background canvas ───────────────────────────── */
+  .bg-grid{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,217,255,.08), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 100% 100%, rgba(124,92,255,.07), transparent 60%),
+      linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 100%);
+  }
+  .bg-grid::after{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size:80px 80px;
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 50%, #000 30%, transparent 80%);
+  }
+
+  /* ── Deck ────────────────────────────────────────── */
+  .deck{
+    position:relative;z-index:1;
+    height:100vh;width:100vw;
+    overflow:hidden;
+  }
+  .slide{
+    position:absolute;inset:0;
+    padding:64px 96px 80px;
+    display:flex;flex-direction:column;
+    opacity:0;visibility:hidden;
+    transform:translateY(24px) scale(.985);
+    transition:opacity .55s cubic-bezier(.2,.7,.2,1),
+               transform .55s cubic-bezier(.2,.7,.2,1),
+               visibility 0s linear .55s;
+  }
+  .slide.active{
+    opacity:1;visibility:visible;
+    transform:translateY(0) scale(1);
+    transition:opacity .55s cubic-bezier(.2,.7,.2,1),
+               transform .55s cubic-bezier(.2,.7,.2,1),
+               visibility 0s linear 0s;
+  }
+
+  /* slide header (small label top-left of each slide) */
+  .slide-tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-2);
+    display:flex;align-items:center;gap:14px;
+    margin-bottom:48px;
+  }
+  .slide-tag .dot{
+    width:6px;height:6px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 12px var(--accent);
+  }
+  .slide-tag .num{color:var(--accent)}
+
+  h1.title{
+    font-size:clamp(48px,7vw,108px);
+    font-weight:800;
+    line-height:.95;
+    letter-spacing:-0.04em;
+    background:linear-gradient(180deg,#fff 0%, #a9b8d3 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  h2.title{
+    font-size:clamp(40px,5.5vw,76px);
+    font-weight:800;
+    line-height:1.02;
+    letter-spacing:-0.035em;
+    max-width:16ch;
+  }
+  h2.title em{
+    font-style:normal;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .lead{
+    font-size:clamp(18px,1.4vw,22px);
+    color:var(--ink-1);font-weight:400;
+    max-width:64ch;line-height:1.55;
+  }
+
+  /* ── Slide 1 — cover ────────────────────────────── */
+  .cover{
+    justify-content:center;align-items:flex-start;
+    padding-left:128px;
+  }
+  .cover .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:32px;
+    display:flex;align-items:center;gap:18px;
+  }
+  .cover .eyebrow::before{
+    content:"";width:48px;height:1px;background:var(--accent);
+  }
+  .cover h1{margin-bottom:28px}
+  .cover .sub{
+    font-size:clamp(22px,2vw,30px);
+    color:var(--ink-1);font-weight:300;letter-spacing:-0.01em;
+    max-width:30ch;line-height:1.3;margin-bottom:64px;
+  }
+  .cover .sub b{color:var(--ink-0);font-weight:600}
+  .cover .meta{
+    display:flex;gap:48px;flex-wrap:wrap;
+    padding-top:32px;border-top:1px solid var(--line);
+    width:60%;
+  }
+  .meta-cell{display:flex;flex-direction:column;gap:6px}
+  .meta-cell .k{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-2);
+  }
+  .meta-cell .v{font-size:16px;color:var(--ink-0);font-weight:500}
+
+  /* Cover visual: orbiting metro graph */
+  .cover-visual{
+    position:absolute;right:-40px;top:50%;transform:translateY(-50%);
+    width:640px;height:640px;pointer-events:none;
+    opacity:.95;
+  }
+
+  /* ── Generic 2-col layouts ──────────────────────── */
+  .two-col{
+    display:grid;grid-template-columns:1.1fr 1fr;gap:80px;flex:1;align-items:center;
+  }
+  .col-left, .col-right{display:flex;flex-direction:column;gap:32px}
+
+  /* ── Cards ──────────────────────────────────────── */
+  .card{
+    background:var(--glass);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:28px 30px;
+    backdrop-filter:blur(10px);
+    transition:border-color .3s, transform .3s, background .3s;
+    position:relative;overflow:hidden;
+  }
+  .card:hover{border-color:var(--line-strong);transform:translateY(-2px)}
+  .card .icon{
+    width:42px;height:42px;border-radius:11px;
+    display:grid;place-items:center;
+    background:linear-gradient(135deg, rgba(0,217,255,.16), rgba(124,92,255,.16));
+    border:1px solid var(--line-strong);
+    margin-bottom:18px;
+    color:var(--accent);
+  }
+  .card h3{
+    font-size:20px;font-weight:600;margin-bottom:10px;letter-spacing:-0.015em;
+  }
+  .card p{font-size:15px;color:var(--ink-1);line-height:1.55}
+
+  .card-grid{display:grid;gap:20px}
+  .card-grid.cols-2{grid-template-columns:1fr 1fr}
+  .card-grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  .card-grid.cols-4{grid-template-columns:repeat(4,1fr)}
+
+  /* ── Stat blocks ────────────────────────────────── */
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:8px}
+  .stat{
+    border:1px solid var(--line);
+    border-radius:16px;padding:28px 26px;
+    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  }
+  .stat .n{
+    font-size:clamp(40px,4.5vw,64px);font-weight:800;
+    background:linear-gradient(180deg,#fff,#a9b8d3);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    line-height:1;letter-spacing:-0.03em;
+  }
+  .stat .l{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-2);margin-top:12px;
+  }
+
+  /* ── Pills / chips ──────────────────────────────── */
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 14px;border-radius:999px;
+    background:rgba(0,217,255,.08);border:1px solid rgba(0,217,255,.24);
+    color:var(--accent);
+    font-size:12px;font-weight:500;letter-spacing:.02em;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .pill.purple{background:rgba(124,92,255,.08);border-color:rgba(124,92,255,.24);color:var(--accent-2)}
+  .pill.gold{background:rgba(255,209,102,.08);border-color:rgba(255,209,102,.24);color:var(--accent-3)}
+
+  /* ── Tables ─────────────────────────────────────── */
+  table.t{
+    width:100%;border-collapse:collapse;
+    font-size:15px;
+  }
+  table.t th, table.t td{
+    padding:16px 20px;text-align:left;
+    border-bottom:1px solid var(--line);
+  }
+  table.t th{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-2);font-weight:500;
+  }
+  table.t td.num{font-family:'JetBrains Mono',monospace;color:var(--accent)}
+
+  /* ── Quiz ───────────────────────────────────────── */
+  .quiz{
+    background:var(--glass);
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:40px 44px;
+    max-width:920px;
+  }
+  .quiz-question{
+    font-size:28px;font-weight:600;margin-bottom:32px;
+    line-height:1.3;letter-spacing:-0.02em;
+  }
+  .quiz-options{display:grid;gap:14px}
+  .quiz-opt{
+    display:flex;align-items:center;gap:16px;
+    padding:18px 22px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    cursor:pointer;
+    transition:all .25s;
+    font-size:16px;
+    background:transparent;color:var(--ink-0);text-align:left;
+    width:100%;
+    font-family:inherit;
+  }
+  .quiz-opt:hover{border-color:var(--accent);background:rgba(0,217,255,.04)}
+  .quiz-opt .letter{
+    width:34px;height:34px;border-radius:10px;
+    background:rgba(255,255,255,.05);
+    display:grid;place-items:center;
+    font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+    color:var(--ink-2);flex-shrink:0;
+    transition:all .25s;
+  }
+  .quiz-opt:hover .letter{background:rgba(0,217,255,.16);color:var(--accent)}
+  .quiz-opt.correct{
+    border-color:var(--good);background:rgba(61,220,151,.08);
+  }
+  .quiz-opt.correct .letter{background:var(--good);color:#000}
+  .quiz-opt.wrong{
+    border-color:var(--bad);background:rgba(255,107,107,.06);opacity:.6;
+  }
+  .quiz-opt.wrong .letter{background:var(--bad);color:#000}
+  .quiz-opt:disabled{cursor:default}
+  .quiz-explain{
+    margin-top:24px;padding:18px 22px;
+    border-left:3px solid var(--accent);
+    background:rgba(0,217,255,.04);
+    border-radius:0 12px 12px 0;
+    color:var(--ink-1);font-size:15px;line-height:1.6;
+    display:none;
+  }
+  .quiz-explain.show{display:block;animation:fadeIn .4s ease}
+  .quiz-progress{
+    display:flex;gap:8px;margin-bottom:24px;
+  }
+  .quiz-progress span{
+    flex:1;height:3px;border-radius:2px;background:var(--line);
+    transition:background .3s;
+  }
+  .quiz-progress span.done{background:var(--accent)}
+  .quiz-progress span.current{background:var(--accent-2)}
+
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ── Roadmap / timeline ─────────────────────────── */
+  .roadmap{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    position:relative;margin-top:32px;
+  }
+  .roadmap::before{
+    content:"";position:absolute;top:24px;left:5%;right:5%;height:2px;
+    background:linear-gradient(90deg, var(--accent), var(--accent-2));
+    opacity:.5;
+  }
+  .step{position:relative;padding:0 16px}
+  .step .dot{
+    width:48px;height:48px;border-radius:50%;
+    background:var(--bg-1);border:2px solid var(--accent);
+    display:grid;place-items:center;
+    font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent);
+    margin-bottom:20px;position:relative;z-index:1;
+  }
+  .step h4{font-size:17px;font-weight:600;margin-bottom:6px;letter-spacing:-0.01em}
+  .step p{font-size:14px;color:var(--ink-2);line-height:1.5}
+
+  /* ── Final slide ────────────────────────────────── */
+  .final{
+    justify-content:center;align-items:center;text-align:center;
+    padding:0;
+  }
+  .final h1{
+    font-size:clamp(60px,8vw,128px);
+    font-weight:900;line-height:.95;letter-spacing:-0.04em;
+    background:linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    margin-bottom:32px;
+  }
+  .final .sub{
+    font-size:24px;color:var(--ink-1);max-width:48ch;line-height:1.45;
+    margin-bottom:48px;
+  }
+  .cta{
+    display:inline-flex;align-items:center;gap:12px;
+    padding:18px 32px;border-radius:14px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:#000;font-weight:600;font-size:16px;
+    border:none;cursor:pointer;
+    transition:transform .2s, box-shadow .2s;
+    box-shadow:0 10px 40px rgba(0,217,255,.25);
+  }
+  .cta:hover{transform:translateY(-2px);box-shadow:0 14px 50px rgba(0,217,255,.4)}
+
+  /* ── Nav HUD ────────────────────────────────────── */
+  .hud{
+    position:fixed;top:0;left:0;right:0;height:56px;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 32px;
+    background:linear-gradient(180deg, rgba(5,8,15,.6), transparent);
+    pointer-events:none;
+  }
+  .hud > *{pointer-events:auto}
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2);
+  }
+  .brand .logo{
+    width:22px;height:22px;border-radius:6px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:grid;place-items:center;color:#000;font-weight:900;font-size:11px;
+  }
+  .hud-counter{
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-2);
+    letter-spacing:.14em;
+  }
+  .hud-counter b{color:var(--ink-0)}
+
+  /* Side dot navigation */
+  .nav-dots{
+    position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:50;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .nav-dots button{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--ink-3);border:none;cursor:pointer;
+    transition:all .25s;padding:0;
+    position:relative;
+  }
+  .nav-dots button:hover{background:var(--ink-2);transform:scale(1.4)}
+  .nav-dots button.active{
+    background:var(--accent);
+    box-shadow:0 0 12px var(--accent);
+    width:8px;height:24px;border-radius:4px;
+  }
+  .nav-dots button::after{
+    content:attr(data-label);
+    position:absolute;right:18px;top:50%;transform:translateY(-50%);
+    background:var(--bg-2);border:1px solid var(--line);
+    padding:6px 10px;border-radius:6px;font-size:11px;color:var(--ink-1);
+    white-space:nowrap;opacity:0;pointer-events:none;
+    transition:opacity .2s;
+    font-family:'Inter',sans-serif;letter-spacing:0;text-transform:none;
+  }
+  .nav-dots button:hover::after{opacity:1}
+
+  /* Bottom controls */
+  .controls{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    z-index:50;display:flex;align-items:center;gap:8px;
+    background:rgba(10,22,40,.65);backdrop-filter:blur(16px);
+    border:1px solid var(--line);
+    padding:8px;border-radius:14px;
+  }
+  .controls button{
+    background:transparent;border:none;color:var(--ink-1);
+    padding:8px 14px;border-radius:8px;cursor:pointer;
+    font-size:13px;font-family:inherit;font-weight:500;
+    display:flex;align-items:center;gap:6px;
+    transition:background .2s, color .2s;
+  }
+  .controls button:hover{background:var(--glass);color:var(--ink-0)}
+  .controls .sep{width:1px;height:20px;background:var(--line)}
+  .controls .progress-bar{
+    width:120px;height:3px;background:var(--line);border-radius:2px;overflow:hidden;
+    margin:0 8px;
+  }
+  .controls .progress-bar > div{
+    height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    transition:width .4s ease;
+  }
+
+  /* Speaker notes panel */
+  .notes{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    background:rgba(5,8,15,.97);backdrop-filter:blur(20px);
+    border-top:1px solid var(--accent);
+    padding:24px 48px 28px;
+    transform:translateY(100%);
+    transition:transform .4s cubic-bezier(.2,.7,.2,1);
+    max-height:55vh;overflow-y:auto;
+  }
+  .notes.show{transform:translateY(0)}
+  .notes-header{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .notes-header .label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);
+    display:flex;align-items:center;gap:10px;
+  }
+  .notes-header .label .dot{
+    width:8px;height:8px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 10px var(--accent);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .notes-close{
+    background:transparent;border:1px solid var(--line);color:var(--ink-1);
+    padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;
+    font-family:inherit;
+  }
+  .notes-body{
+    font-size:16px;line-height:1.7;color:var(--ink-1);
+    max-width:96ch;
+  }
+  .notes-body b{color:var(--ink-0);font-weight:600}
+  .notes-body .hint{
+    display:inline-block;padding:2px 8px;margin:0 2px;
+    background:rgba(0,217,255,.1);border-radius:4px;
+    color:var(--accent);font-size:14px;font-weight:500;
+  }
+
+  /* Graph visualization */
+  .graph-viz{
+    width:100%;height:100%;
+    border:1px solid var(--line);border-radius:18px;
+    background:radial-gradient(ellipse at center, rgba(0,217,255,.04), transparent 70%);
+    overflow:hidden;position:relative;
+  }
+  .graph-viz svg{width:100%;height:100%;display:block}
+
+  /* Algorithm comparison cards (slide 5) */
+  .algo-card{
+    background:linear-gradient(180deg, rgba(255,255,255,.025), transparent);
+    border:1px solid var(--line);
+    border-radius:18px;padding:28px;
+    transition:all .3s;cursor:pointer;
+    position:relative;
+  }
+  .algo-card:hover{border-color:var(--accent);transform:translateY(-4px)}
+  .algo-card .num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;color:var(--accent);font-weight:600;
+    margin-bottom:14px;letter-spacing:.1em;
+  }
+  .algo-card h3{font-size:22px;font-weight:600;margin-bottom:8px}
+  .algo-card .complexity{
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    color:var(--ink-2);margin-bottom:14px;
+  }
+  .algo-card p{font-size:14px;color:var(--ink-1);line-height:1.55}
+
+  /* Big text quote */
+  .quote{
+    font-size:clamp(36px,4vw,56px);font-weight:600;
+    line-height:1.15;letter-spacing:-0.025em;
+    max-width:22ch;color:var(--ink-0);
+  }
+  .quote b{
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  /* Bullet list with custom icon */
+  ul.checks{list-style:none;display:flex;flex-direction:column;gap:18px;margin-top:8px}
+  ul.checks li{
+    display:flex;align-items:flex-start;gap:16px;font-size:17px;color:var(--ink-1);line-height:1.5;
+  }
+  ul.checks li svg{
+    width:22px;height:22px;flex-shrink:0;margin-top:2px;color:var(--accent);
+  }
+  ul.checks li b{color:var(--ink-0);font-weight:600}
+
+  /* Code block */
+  pre.code{
+    background:rgba(0,0,0,.4);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:20px 24px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;line-height:1.6;color:var(--ink-1);
+    overflow:auto;
+  }
+  pre.code .k{color:var(--accent-2)}
+  pre.code .s{color:var(--accent-3)}
+  pre.code .c{color:var(--ink-3);font-style:italic}
+  pre.code .n{color:var(--good)}
+
+  /* Decorative chip */
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* Visible only on print/PDF export potentially */
+  @media (max-width: 960px){
+    .slide{padding:32px 32px 80px}
+    .cover{padding-left:32px}
+    .two-col{grid-template-columns:1fr;gap:32px}
+    .stat-row{grid-template-columns:repeat(2,1fr)}
+    .card-grid.cols-3, .card-grid.cols-4, .roadmap{grid-template-columns:1fr 1fr}
+    .cover-visual{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<!-- ── HUD ─────────────────────────────────────────── -->
+<div class="hud">
+  <div class="brand">
+    <div class="logo">M</div>
+    <span>Metro • EFREI • Dodo</span>
+  </div>
+  <div class="hud-counter"><b id="cur">01</b> / <span id="tot">12</span></div>
+</div>
+
+<!-- ── Deck ────────────────────────────────────────── -->
+<div class="deck" id="deck">
+
+  <!-- ───────── SLIDE 1 — COVER ───────── -->
+  <section class="slide cover active" data-title="Couverture">
+    <div class="cover-visual">
+      <svg viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#00d9ff" stop-opacity=".25"/>
+            <stop offset="100%" stop-color="#00d9ff" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="edgeG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#00d9ff" stop-opacity=".7"/>
+            <stop offset="100%" stop-color="#7c5cff" stop-opacity=".7"/>
+          </linearGradient>
+        </defs>
+        <circle cx="320" cy="320" r="300" fill="url(#glow)"/>
+        <!-- network -->
+        <g id="netEdges" stroke="url(#edgeG)" stroke-width="1.2" opacity=".75" fill="none"></g>
+        <g id="netNodes"></g>
+      </svg>
+    </div>
+
+    <div class="eyebrow">Soutenance MasterCamp · 18 juin 2026</div>
+    <h1 class="title">Metro<br/>EFREI<br/>Dodo.</h1>
+    <div class="sub">Modéliser le métro parisien comme un <b>graphe pondéré</b> — et le rendre intelligent.</div>
+
+    <div class="meta">
+      <div class="meta-cell">
+        <span class="k">Présenté par</span>
+        <span class="v">Mohammed EL KARCHAL</span>
+      </div>
+      <div class="meta-cell">
+        <span class="k">Pour</span>
+        <span class="v">Mme Olga MELEKHOVA</span>
+      </div>
+      <div class="meta-cell">
+        <span class="k">Module</span>
+        <span class="v">Passage M1 · EFREI</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 2 — PROBLÈME ───────── -->
+  <section class="slide" data-title="Problème">
+    <div class="slide-tag"><span class="dot"></span><span class="num">02</span><span>Le problème</span></div>
+    <div class="two-col">
+      <div class="col-left">
+        <h2 class="title">Paris a <em>376 stations</em>. <br/>Combien de chemins entre deux d'entre elles&nbsp;?</h2>
+        <p class="lead">Un voyageur, un GPS, un système d'optimisation… tous se posent la même question : <b>quel chemin choisir</b>, et <b>combien ça coûte</b> en temps&nbsp;?</p>
+        <div class="chips">
+          <span class="pill">376 stations</span>
+          <span class="pill purple">473 liaisons</span>
+          <span class="pill gold">~10⁸⁵ chemins possibles</span>
+        </div>
+      </div>
+      <div class="col-right">
+        <div class="graph-viz" style="aspect-ratio:1;max-height:480px">
+          <svg viewBox="0 0 400 400" id="problemViz">
+            <defs>
+              <radialGradient id="g2" cx="50%" cy="50%" r="60%">
+                <stop offset="0%" stop-color="#7c5cff" stop-opacity=".22"/>
+                <stop offset="100%" stop-color="#7c5cff" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <circle cx="200" cy="200" r="180" fill="url(#g2)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 3 — IMPORTANCE ───────── -->
+  <section class="slide" data-title="Pourquoi">
+    <div class="slide-tag"><span class="dot"></span><span class="num">03</span><span>Pourquoi c'est important</span></div>
+    <h2 class="title" style="margin-bottom:48px">Les graphes sont <em>partout</em>.</h2>
+    <div class="card-grid cols-4">
+      <div class="card">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        </div>
+        <h3>GPS &amp; navigation</h3>
+        <p>Google Maps, Waze, Citymapper — tous reposent sur Dijkstra ou A*.</p>
+      </div>
+      <div class="card">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+        </div>
+        <h3>Réseaux télécom</h3>
+        <p>Routage Internet, fibre optique, 5G : les paquets suivent des plus courts chemins.</p>
+      </div>
+      <div class="card">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 6l3 4M17 6l-3 4M7 18l3-4M17 18l-3-4"/></svg>
+        </div>
+        <h3>Réseaux sociaux</h3>
+        <p>Recommandations, amis communs, propagation virale — théorie des graphes.</p>
+      </div>
+      <div class="card">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3v18"/><circle cx="12" cy="12" r="9"/></svg>
+        </div>
+        <h3>Logistique &amp; énergie</h3>
+        <p>Tournées Amazon, smart grids, optimisation des flux urbains.</p>
+      </div>
+    </div>
+    <div style="margin-top:48px">
+      <p class="lead" style="font-size:22px"><b>Maîtriser le métro parisien, c'est maîtriser des problèmes qui valent des milliards.</b></p>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 4 — OBJECTIFS ───────── -->
+  <section class="slide" data-title="Objectifs">
+    <div class="slide-tag"><span class="dot"></span><span class="num">04</span><span>Objectifs</span></div>
+    <div class="two-col">
+      <div class="col-left">
+        <h2 class="title">Trois questions. <br/>Trois <em>algorithmes</em>.</h2>
+        <p class="lead">Au-delà du rendu visuel : prouver mathématiquement et expérimentalement le comportement du réseau.</p>
+      </div>
+      <div class="col-right">
+        <ul class="checks">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            <span><b>Le réseau est-il connexe ?</b> Peut-on aller de n'importe quelle station à n'importe quelle autre ?</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            <span><b>Quel est le plus court chemin ?</b> Entre deux stations, en temps de trajet.</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            <span><b>Quelle est l'infrastructure minimale ?</b> L'Arbre Couvrant de Poids Minimal (ACPM).</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            <span><b>Quel coût ?</b> Mesurer la performance — temps CPU et empreinte carbone.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 5 — IDÉES CLÉS ───────── -->
+  <section class="slide" data-title="Idées clés">
+    <div class="slide-tag"><span class="dot"></span><span class="num">05</span><span>Les 4 idées clés</span></div>
+    <h2 class="title" style="margin-bottom:40px">Du concept au <em>code</em>.</h2>
+    <div class="card-grid cols-4" style="flex:1;align-items:stretch">
+      <div class="algo-card">
+        <div class="num">01 · MODÉLISATION</div>
+        <h3>Liste d'adjacence</h3>
+        <div class="complexity">Mémoire O(V + E)</div>
+        <p>Un dictionnaire Python : <code style="color:var(--accent)">{station : [(voisin, temps)]}</code>. Le métro est creux → 100× plus léger qu'une matrice.</p>
+      </div>
+      <div class="algo-card">
+        <div class="num">02 · CONNEXITÉ</div>
+        <h3>BFS</h3>
+        <div class="complexity">O(V + E)</div>
+        <p>Parcours en largeur depuis une station. Si tout le monde est visité → le réseau est connexe.</p>
+      </div>
+      <div class="algo-card">
+        <div class="num">03 · CHEMIN OPTIMAL</div>
+        <h3>Dijkstra</h3>
+        <div class="complexity">O((V + E) log V)</div>
+        <p>Tas min, relaxation des arêtes, reconstruction par dictionnaire de prédécesseurs. Validé contre networkx.</p>
+      </div>
+      <div class="algo-card">
+        <div class="num">04 · ACPM</div>
+        <h3>Prim + Kruskal</h3>
+        <div class="complexity">O(E log V)</div>
+        <p>Deux approches différentes, <b>même résultat</b>. Kruskal s'appuie sur Union-Find avec compression de chemin.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 6 — DONNÉES / CHIFFRES ───────── -->
+  <section class="slide" data-title="Chiffres">
+    <div class="slide-tag"><span class="dot"></span><span class="num">06</span><span>Données &amp; résultats</span></div>
+    <h2 class="title" style="margin-bottom:40px">Les <em>chiffres</em> qui prouvent.</h2>
+    <div class="stat-row">
+      <div class="stat"><div class="n">376</div><div class="l">Stations</div></div>
+      <div class="stat"><div class="n">473</div><div class="l">Liaisons</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">Seule composante</div></div>
+      <div class="stat"><div class="n">&lt; 3 ms</div><div class="l">Calcul max</div></div>
+    </div>
+
+    <div style="margin-top:48px;display:grid;grid-template-columns:1.3fr 1fr;gap:48px;align-items:start">
+      <div>
+        <div class="pill" style="margin-bottom:20px">Benchmark des algorithmes</div>
+        <table class="t">
+          <thead>
+            <tr><th>Algorithme</th><th>Temps</th><th>Résultat</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>BFS — connexité</td><td class="num">~0.5 ms</td><td>Réseau connexe</td></tr>
+            <tr><td>Dijkstra maison</td><td class="num">~1 ms</td><td>Chemin optimal</td></tr>
+            <tr><td>Dijkstra networkx</td><td class="num">~1 ms</td><td>Résultat identique ✓</td></tr>
+            <tr><td>Prim (ACPM)</td><td class="num">~2 ms</td><td>20 362 s</td></tr>
+            <tr><td>Kruskal (ACPM)</td><td class="num">~3 ms</td><td>20 362 s — identique ✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="pill purple" style="margin-bottom:20px">Exemple concret</div>
+        <div class="card" style="padding:32px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-2);letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px">Trajet calculé</div>
+          <div style="font-size:24px;font-weight:600;line-height:1.3;margin-bottom:18px">
+            Abbesses <span style="color:var(--accent)">→</span> Nation
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:14px">
+            <div>
+              <div style="color:var(--ink-2);margin-bottom:4px">Durée</div>
+              <div style="font-size:22px;font-weight:700;color:var(--accent)">20:26</div>
+            </div>
+            <div>
+              <div style="color:var(--ink-2);margin-bottom:4px">Stations</div>
+              <div style="font-size:22px;font-weight:700;color:var(--accent)">19</div>
+            </div>
+            <div>
+              <div style="color:var(--ink-2);margin-bottom:4px">Calcul</div>
+              <div style="font-size:22px;font-weight:700;color:var(--accent)">&lt; 1 ms</div>
+            </div>
+            <div>
+              <div style="color:var(--ink-2);margin-bottom:4px">CO₂eq</div>
+              <div style="font-size:22px;font-weight:700;color:var(--accent)">~µg</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 7 — INFOGRAPHIE ───────── -->
+  <section class="slide" data-title="Schéma">
+    <div class="slide-tag"><span class="dot"></span><span class="num">07</span><span>Schéma du concept</span></div>
+    <h2 class="title" style="margin-bottom:40px">Du fichier <em>.txt</em> à la <em>réponse</em>.</h2>
+    <div style="flex:1;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;gap:0;position:relative">
+      <!-- pipeline -->
+      <div style="text-align:center">
+        <div style="width:84px;height:84px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 18px">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#00d9ff" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div style="font-size:14px;font-weight:600">metro.txt</div>
+        <div style="font-size:12px;color:var(--ink-2);margin-top:4px">376 V · 473 E</div>
+      </div>
+      <div style="text-align:center;font-size:24px;color:var(--accent)">→</div>
+      <div style="text-align:center">
+        <div style="width:84px;height:84px;border-radius:20px;background:rgba(0,217,255,.08);border:1px solid rgba(0,217,255,.3);display:grid;place-items:center;margin:0 auto 18px">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#00d9ff" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 6l3 4M17 6l-3 4M7 18l3-4M17 18l-3-4"/></svg>
+        </div>
+        <div style="font-size:14px;font-weight:600">Graphe pondéré</div>
+        <div style="font-size:12px;color:var(--ink-2);margin-top:4px">Liste d'adjacence</div>
+      </div>
+      <div style="text-align:center;font-size:24px;color:var(--accent)">→</div>
+      <div style="text-align:center">
+        <div style="width:84px;height:84px;border-radius:20px;background:linear-gradient(135deg,rgba(0,217,255,.16),rgba(124,92,255,.16));border:1px solid var(--accent);display:grid;place-items:center;margin:0 auto 18px;box-shadow:0 0 30px rgba(0,217,255,.2)">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#00d9ff" stroke-width="1.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        </div>
+        <div style="font-size:14px;font-weight:600">Algorithmes</div>
+        <div style="font-size:12px;color:var(--ink-2);margin-top:4px">BFS · Dijkstra · Prim · Kruskal</div>
+      </div>
+    </div>
+
+    <div style="margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+      <div class="card" style="padding:22px 24px">
+        <div class="pill" style="margin-bottom:12px;font-size:10px">Question 1</div>
+        <div style="font-size:18px;font-weight:600;margin-bottom:6px">Connexe ?</div>
+        <div style="color:var(--good);font-weight:600">→ Oui, 1 composante</div>
+      </div>
+      <div class="card" style="padding:22px 24px">
+        <div class="pill purple" style="margin-bottom:12px;font-size:10px">Question 2</div>
+        <div style="font-size:18px;font-weight:600;margin-bottom:6px">Plus court chemin ?</div>
+        <div style="color:var(--accent-2);font-weight:600">→ Dijkstra · &lt; 1 ms</div>
+      </div>
+      <div class="card" style="padding:22px 24px">
+        <div class="pill gold" style="margin-bottom:12px;font-size:10px">Question 3</div>
+        <div style="font-size:18px;font-weight:600;margin-bottom:6px">ACPM ?</div>
+        <div style="color:var(--accent-3);font-weight:600">→ 20 362 s · 339 min</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 8 — QUIZ ───────── -->
+  <section class="slide" data-title="Quiz">
+    <div class="slide-tag"><span class="dot"></span><span class="num">08</span><span>À vous de jouer</span></div>
+    <h2 class="title" style="margin-bottom:32px">Mini-quiz <em>en direct</em>.</h2>
+
+    <div class="quiz">
+      <div class="quiz-progress" id="qProg">
+        <span class="current"></span><span></span><span></span>
+      </div>
+      <div id="qContainer">
+        <div class="quiz-question" id="qText">Chargement…</div>
+        <div class="quiz-options" id="qOpts"></div>
+        <div class="quiz-explain" id="qExplain"></div>
+        <div style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-2);letter-spacing:.16em">
+            QUESTION <b id="qNum" style="color:var(--accent)">1</b> / 3
+          </div>
+          <button id="qNext" class="cta" style="display:none;padding:12px 24px;font-size:14px">Suivante →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 9 — SOLUTIONS / RECOS ───────── -->
+  <section class="slide" data-title="Solutions">
+    <div class="slide-tag"><span class="dot"></span><span class="num">09</span><span>Solutions retenues</span></div>
+    <div class="two-col" style="grid-template-columns:1fr 1fr">
+      <div class="col-left">
+        <h2 class="title">Des choix <em>justifiés</em>, pas subis.</h2>
+        <ul class="checks">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            <span><b>Algos codés à la main</b> — compréhension profonde, explicables ligne par ligne.</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            <span><b>Validation networkx</b> — preuve formelle de correction du Dijkstra.</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            <span><b>Interface Streamlit + Plotly</b> — démo interactive sans frontend lourd.</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            <span><b>codecarbon</b> — mesure de l'empreinte carbone (sobriété numérique).</span>
+          </li>
+        </ul>
+      </div>
+      <div class="col-right">
+<pre class="code"><span class="c"># Dijkstra — extrait du cœur de l'algo</span>
+<span class="k">def</span> dijkstra(g, depart, arrivee):
+    dist = {s: <span class="k">float</span>(<span class="s">"inf"</span>) <span class="k">for</span> s <span class="k">in</span> g.sommets}
+    dist[depart] = <span class="n">0</span>
+    tas = [(<span class="n">0</span>, depart)]
+
+    <span class="k">while</span> tas:
+        d, u = heappop(tas)
+        <span class="k">if</span> u == arrivee: <span class="k">break</span>
+        <span class="k">for</span> v, temps <span class="k">in</span> g.adjacence[u]:
+            <span class="k">if</span> dist[u] + temps &lt; dist[v]:
+                dist[v] = dist[u] + temps
+                heappush(tas, (dist[v], v))
+    <span class="k">return</span> dist[arrivee]</pre>
+        <div style="margin-top:18px;font-size:14px;color:var(--ink-2);text-align:right">
+          → 25 lignes pour battre Google Maps* sur le métro parisien
+          <div style="font-size:11px;color:var(--ink-3);margin-top:4px">*sur ce dataset uniquement, évidemment 😉</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 10 — PLAN D'ACTION ───────── -->
+  <section class="slide" data-title="Plan d'action">
+    <div class="slide-tag"><span class="dot"></span><span class="num">10</span><span>Plan d'action</span></div>
+    <h2 class="title" style="margin-bottom:24px">De l'idée à la <em>démo</em>.</h2>
+    <p class="lead" style="margin-bottom:48px">4 étapes, 4 livrables, 0 dépendance bloquante.</p>
+
+    <div class="roadmap">
+      <div class="step">
+        <div class="dot">1</div>
+        <h4>Parser &amp; modèle</h4>
+        <p>Chargement des 376 stations + 473 arêtes depuis <code style="color:var(--accent);font-size:13px">metro.txt</code>.</p>
+      </div>
+      <div class="step">
+        <div class="dot">2</div>
+        <h4>Algorithmes</h4>
+        <p>BFS, Dijkstra, Prim, Kruskal — chacun testé sur un mini-graphe puis sur Paris.</p>
+      </div>
+      <div class="step">
+        <div class="dot">3</div>
+        <h4>Validation</h4>
+        <p>Croisement networkx, assertions Prim = Kruskal, suite de tests unitaires.</p>
+      </div>
+      <div class="step">
+        <div class="dot">4</div>
+        <h4>Démo &amp; mesure</h4>
+        <p>Interface Streamlit + Plotly, benchmark codecarbon, rapport complet.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:56px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+      <div class="card">
+        <h3 style="color:var(--good)">✓ Livré</h3>
+        <p>Tous les algos + UI + tests + rapport markdown.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--accent)">→ Prochaine itération</h3>
+        <p>A* avec heuristique géo, support multi-modal (RER, bus).</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--accent-2)">↗ Vision long-terme</h3>
+        <p>Données IDFM temps réel + prédiction de retards.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 11 — CONCLUSION ───────── -->
+  <section class="slide" data-title="Conclusion">
+    <div class="slide-tag"><span class="dot"></span><span class="num">11</span><span>Conclusion</span></div>
+    <div style="flex:1;display:grid;grid-template-columns:1.3fr 1fr;gap:80px;align-items:center">
+      <div>
+        <p class="quote">
+          Un graphe, c'est <b>la grammaire</b> des systèmes connectés.<br/>
+          Et Paris, c'est juste <b>un beau premier exercice.</b>
+        </p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div class="stat" style="padding:24px 26px">
+          <div style="font-size:36px;font-weight:800;color:var(--accent)">3</div>
+          <div style="font-size:14px;color:var(--ink-1);margin-top:6px">questions fondamentales résolues</div>
+        </div>
+        <div class="stat" style="padding:24px 26px">
+          <div style="font-size:36px;font-weight:800;color:var(--accent-2)">4</div>
+          <div style="font-size:14px;color:var(--ink-1);margin-top:6px">algorithmes codés à la main</div>
+        </div>
+        <div class="stat" style="padding:24px 26px">
+          <div style="font-size:36px;font-weight:800;color:var(--accent-3)">100 %</div>
+          <div style="font-size:14px;color:var(--ink-1);margin-top:6px">résultats validés vs networkx</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── SLIDE 12 — CTA ───────── -->
+  <section class="slide final" data-title="Merci">
+    <div>
+      <div class="eyebrow" style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-2);margin-bottom:24px;display:flex;align-items:center;justify-content:center;gap:18px">
+        <span style="width:48px;height:1px;background:var(--accent)"></span>
+        Place à vos questions
+        <span style="width:48px;height:1px;background:var(--accent)"></span>
+      </div>
+      <h1>Merci.</h1>
+      <p class="sub">Mohammed EL KARCHAL · MasterCamp 2026<br/>
+      Présenté à Mme Olga MELEKHOVA</p>
+      <button class="cta" onclick="goTo(0)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        Revenir au début
+      </button>
+    </div>
+  </section>
+
+</div>
+
+<!-- ── Side dot navigation ─────────────────────────── -->
+<div class="nav-dots" id="navDots"></div>
+
+<!-- ── Bottom controls ─────────────────────────────── -->
+<div class="controls">
+  <button onclick="prev()" title="Précédent (←)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <div class="progress-bar"><div id="progBar"></div></div>
+  <button onclick="next()" title="Suivant (→)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <div class="sep"></div>
+  <button onclick="toggleNotes()" title="Notes orateur (N)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+    Notes
+  </button>
+  <button onclick="toggleFs()" title="Plein écran (F)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+  </button>
+</div>
+
+<!-- ── Speaker notes ───────────────────────────────── -->
+<div class="notes" id="notesPanel">
+  <div class="notes-header">
+    <div class="label"><span class="dot"></span>Notes orateur · Slide <span id="notesNum">1</span></div>
+    <button class="notes-close" onclick="toggleNotes()">Fermer (N)</button>
+  </div>
+  <div class="notes-body" id="notesBody"></div>
+</div>
+
+<script>
+/* ────────────────────────────────────────────────────────
+   DECK CONTROLLER
+   ──────────────────────────────────────────────────────── */
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let idx = 0;
+
+const cur = document.getElementById('cur');
+const tot = document.getElementById('tot');
+const progBar = document.getElementById('progBar');
+const notesNum = document.getElementById('notesNum');
+const notesBody = document.getElementById('notesBody');
+const notesPanel = document.getElementById('notesPanel');
+const navDots = document.getElementById('navDots');
+
+tot.textContent = String(total).padStart(2,'0');
+
+/* Speaker notes - per slide */
+const NOTES = [
+  // 1 - Cover
+  `<b>[Posture confiante, sourire calme. Regarder Mme MELEKHOVA.]</b><br><br>
+   Bonjour Madame, bonjour à toutes et à tous. Je m'appelle <b>Mohammed EL KARCHAL</b>, et je vais vous présenter aujourd'hui mon projet de MasterCamp : <b>Metro EFREI Dodo</b>.<br><br>
+   L'idée tient en une phrase : <b>modéliser le métro parisien comme un graphe pondéré</b>, puis répondre à trois questions fondamentales — la connexité, le plus court chemin, et l'arbre couvrant minimal — en codant les algorithmes à la main.<br><br>
+   <span class="hint">⏱ ~45s</span> Cette présentation dure une quinzaine de minutes. Elle est <b>interactive</b> — il y aura même un petit quiz à mi-parcours. À la fin, je serai très heureux de répondre à vos questions.`,
+
+  // 2 - Problème
+  `<b>[Marquer une pause après la question.]</b><br><br>
+   Le métro parisien, c'est <b>376 stations</b> et <b>473 liaisons</b>. À première vue, ça paraît modeste. Mais entre deux stations, le nombre de chemins possibles est <b>astronomique</b> — de l'ordre de 10⁸⁵.<br><br>
+   Le défi n'est donc pas de trouver <i>un</i> chemin, mais de trouver <b>le meilleur</b>, c'est-à-dire celui qui minimise le temps de trajet. C'est exactement le problème qu'un GPS, un système de routage Internet, ou un algorithme de livraison Amazon doivent résoudre tous les jours.<br><br>
+   <span class="hint">⏱ ~1 min</span> Et derrière cette question simple — "quel chemin choisir ?" — il y a une discipline mathématique entière : <b>la théorie des graphes</b>.`,
+
+  // 3 - Pourquoi
+  `<b>[Insister sur l'universalité.]</b><br><br>
+   Pourquoi est-ce que ce sujet va bien au-delà du métro ? Parce que les graphes sont <b>partout</b>.<br><br>
+   <b>GPS et navigation</b> — Google Maps, Waze, Citymapper utilisent tous une variante de Dijkstra.<br>
+   <b>Réseaux télécom</b> — quand vous chargez cette page, vos paquets IP suivent un plus court chemin entre routeurs.<br>
+   <b>Réseaux sociaux</b> — les recommandations "amis communs" reposent sur un parcours de graphe.<br>
+   <b>Logistique et énergie</b> — Amazon optimise les tournées, EDF équilibre les smart grids.<br><br>
+   <span class="hint">⏱ ~1 min 15s</span> Maîtriser ces algorithmes sur le métro parisien, c'est se donner les clés pour comprendre des systèmes qui pèsent des <b>milliards d'euros</b>.`,
+
+  // 4 - Objectifs
+  `<b>[Compter sur les doigts pour rythmer.]</b><br><br>
+   Mon projet répond à <b>quatre questions précises</b> :<br><br>
+   <b>Un</b> — Le réseau est-il <b>connexe</b> ? Autrement dit : peut-on aller de n'importe quelle station à n'importe quelle autre ? Réponse via un parcours en largeur (BFS).<br><br>
+   <b>Deux</b> — Quel est le <b>plus court chemin</b> entre deux stations ? Réponse via Dijkstra.<br><br>
+   <b>Trois</b> — Quelle est <b>l'infrastructure minimale</b> qui relierait toutes les stations ? C'est l'Arbre Couvrant de Poids Minimal — résolu par Prim et Kruskal.<br><br>
+   <b>Quatre</b> — Et surtout, à quel <b>coût</b> ? Combien de millisecondes ? Combien de grammes de CO₂ ?<br><br>
+   <span class="hint">⏱ ~1 min 30s</span> Ces quatre questions structurent toute la suite.`,
+
+  // 5 - Idées clés
+  `<b>[Pointer chaque carte du doigt en parlant.]</b><br><br>
+   Concrètement, quatre briques techniques.<br><br>
+   <b>Un — la modélisation.</b> J'ai choisi une <b>liste d'adjacence</b>, c'est-à-dire un dictionnaire Python qui associe à chaque station la liste de ses voisins avec le temps de trajet. Pourquoi pas une matrice ? Parce que le graphe est <b>creux</b> : 473 arêtes sur 141 000 cases possibles. La liste est 100 fois plus légère.<br><br>
+   <b>Deux — le BFS</b> pour la connexité. Complexité linéaire en O(V + E). Très simple, très efficace.<br><br>
+   <b>Trois — Dijkstra</b> pour le plus court chemin. Tas min, relaxation des arêtes. Complexité O((V + E) log V).<br><br>
+   <b>Quatre — Prim et Kruskal</b> pour l'ACPM. J'ai implémenté les <b>deux</b>, et utilisé une structure <b>Union-Find avec compression de chemin</b> pour Kruskal.<br><br>
+   <span class="hint">⏱ ~1 min 45s</span> Ces quatre algos couvrent l'essentiel de la théorie des graphes vue cette année.`,
+
+  // 6 - Chiffres
+  `<b>[Désigner le tableau, puis l'exemple à droite.]</b><br><br>
+   Voici les chiffres qui prouvent que ça marche.<br><br>
+   <b>376 stations, 473 liaisons, 1 seule composante connexe.</b> Le réseau est entièrement connecté — pas surprenant, mais c'est démontré, pas supposé.<br><br>
+   Sur le benchmark : <b>tous les algos s'exécutent en moins de 3 millisecondes</b>. Le Dijkstra maison donne <b>exactement</b> le même résultat que celui de networkx — preuve que mon implémentation est correcte. Et Prim et Kruskal convergent vers <b>20 362 secondes</b> au poids total, soit environ 5h39 — c'est la "longueur" minimale d'un réseau qui relierait toutes les stations.<br><br>
+   <b>Exemple concret</b> : trajet Abbesses → Nation. <b>20 minutes 26 secondes</b>, 19 stations, calculé en moins d'une milliseconde. Et — c'est anecdotique mais important — l'empreinte carbone se mesure en <b>microgrammes</b> de CO₂eq.<br><br>
+   <span class="hint">⏱ ~2 min</span> C'est ça, la sobriété numérique : un code efficace consomme presque rien.`,
+
+  // 7 - Schéma
+  `<b>[Suivre le pipeline avec la main, gauche → droite.]</b><br><br>
+   Pour résumer le pipeline complet, en une image.<br><br>
+   À gauche : <b>les données brutes</b>. Un fichier texte avec 376 sommets et 473 arêtes, parsé en quelques lignes de Python.<br><br>
+   Au milieu : <b>le graphe pondéré</b> en mémoire. Liste d'adjacence, validée par le test de connexité.<br><br>
+   À droite : <b>les algorithmes</b> qui répondent aux trois questions. BFS pour la connexité, Dijkstra pour le chemin optimal, Prim et Kruskal pour l'ACPM.<br><br>
+   En bas, les trois résultats : <b>oui le réseau est connexe</b>, <b>Dijkstra trouve le chemin en moins d'1 ms</b>, et <b>l'ACPM pèse 20 362 secondes</b>.<br><br>
+   <span class="hint">⏱ ~2 min 15s</span> Toute la complexité tient dans ces trois cartes.`,
+
+  // 8 - Quiz
+  `<b>[Sourire. Inviter le public à répondre à main levée.]</b><br><br>
+   Maintenant, <b>un petit test</b>. Pas pour vous piéger — juste pour vérifier qu'on est tous sur la même longueur d'onde.<br><br>
+   Je vais vous poser <b>trois questions courtes</b>. Vous pouvez voter à main levée, ou simplement deviner mentalement. Les réponses apparaissent au clic.<br><br>
+   <b>[Cliquer sur les options en interrogeant le public à chaque fois. Ce moment doit être détendu, vivant.]</b><br><br>
+   <span class="hint">⏱ ~2 min 30s pour le quiz complet</span> Profitez-en pour respirer, regarder le public, et créer du lien.`,
+
+  // 9 - Solutions
+  `<b>[Pivoter vers le code à droite, mais sans le lire.]</b><br><br>
+   Quatre choix techniques que je revendique :<br><br>
+   <b>Un — coder les algos à la main</b>, pas en appelant networkx. Pourquoi ? Parce que je voulais pouvoir <b>expliquer chaque ligne</b> à l'oral, devant vous. Le code à droite, c'est le cœur de Dijkstra. <b>25 lignes.</b><br><br>
+   <b>Deux — valider avec networkx</b>. Mon Dijkstra maison donne le même résultat que la bibliothèque de référence : c'est une preuve formelle de correction.<br><br>
+   <b>Trois — Streamlit + Plotly</b>. Une interface web interactive sans avoir à écrire du frontend. L'utilisateur peut sélectionner deux stations et voir le trajet s'animer sur la carte.<br><br>
+   <b>Quatre — codecarbon</b>. Parce qu'aujourd'hui, on ne peut plus écrire du code sans se poser la question de son empreinte.<br><br>
+   <span class="hint">⏱ ~1 min 30s</span> Chaque ligne du repo est défendable.`,
+
+  // 10 - Plan d'action
+  `<b>[Compter les étapes sur les doigts.]</b><br><br>
+   Le projet s'est construit en <b>quatre étapes</b>, sans dépendance bloquante :<br><br>
+   <b>Un — parser et modèle.</b> Lecture du fichier <code>metro.txt</code>, construction du graphe en mémoire.<br>
+   <b>Deux — algorithmes.</b> Implémentation puis test sur un mini-graphe avant d'attaquer Paris.<br>
+   <b>Trois — validation.</b> Croisement avec networkx, assertions Prim = Kruskal, tests unitaires.<br>
+   <b>Quatre — démo et mesure.</b> Interface Streamlit, benchmark codecarbon, rapport.<br><br>
+   <b>Ce qui est livré aujourd'hui</b> : tout. Algos, UI, tests, rapport markdown.<br><br>
+   <b>Prochaine itération</b> : passer à <b>A*</b> avec une heuristique géographique, et supporter les RER et bus.<br><br>
+   <b>Vision long-terme</b> : brancher l'API IDFM temps réel pour intégrer les retards et perturbations.<br><br>
+   <span class="hint">⏱ ~1 min 30s</span>`,
+
+  // 11 - Conclusion
+  `<b>[Ralentir le débit. Regarder Mme MELEKHOVA.]</b><br><br>
+   Si je devais résumer en une phrase :<br><br>
+   <b>"Un graphe, c'est la grammaire des systèmes connectés. Et Paris, c'est juste un beau premier exercice."</b><br><br>
+   En chiffres : <b>3 questions fondamentales résolues</b>, <b>4 algorithmes codés à la main</b>, <b>100 % des résultats validés</b> contre une référence externe.<br><br>
+   Ce projet n'est pas une fin. C'est une <b>première brique</b> dans une compétence — la pensée par les graphes — qui sera utile partout : dans l'IA, dans les systèmes distribués, dans la logistique, dans les réseaux sociaux.<br><br>
+   <span class="hint">⏱ ~1 min</span> <b>[Pause. Sourire. Tourner vers la dernière slide.]</b>`,
+
+  // 12 - CTA
+  `<b>[Posture ouverte. Sourire chaleureux.]</b><br><br>
+   <b>Merci pour votre attention.</b><br><br>
+   Je serai très heureux de répondre à vos questions — sur les choix algorithmiques, sur les complexités, sur l'interface, sur la mesure d'empreinte carbone, ou sur tout autre point qui vous intéresse.<br><br>
+   <span class="hint">⏱ ~15-20s</span> <b>[Marquer un silence. Laisser venir les questions.]</b>`
+];
+
+/* Build dot navigation */
+slides.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.dataset.label = `${String(i+1).padStart(2,'0')} · ${s.dataset.title}`;
+  b.onclick = () => goTo(i);
+  navDots.appendChild(b);
+});
+
+function updateUI(){
+  slides.forEach((s,i)=>s.classList.toggle('active', i===idx));
+  cur.textContent = String(idx+1).padStart(2,'0');
+  progBar.style.width = `${((idx+1)/total)*100}%`;
+  [...navDots.children].forEach((b,i)=>b.classList.toggle('active', i===idx));
+  notesNum.textContent = idx+1;
+  notesBody.innerHTML = NOTES[idx] || '';
+}
+
+function goTo(i){
+  idx = Math.max(0, Math.min(total-1, i));
+  updateUI();
+}
+function next(){ if(idx<total-1){idx++;updateUI()} }
+function prev(){ if(idx>0){idx--;updateUI()} }
+
+/* Keyboard */
+document.addEventListener('keydown', e => {
+  if(['ArrowRight','PageDown',' '].includes(e.key)){ e.preventDefault(); next() }
+  else if(['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); prev() }
+  else if(e.key==='Home'){ goTo(0) }
+  else if(e.key==='End'){ goTo(total-1) }
+  else if(e.key==='n' || e.key==='N'){ toggleNotes() }
+  else if(e.key==='f' || e.key==='F'){ toggleFs() }
+});
+
+function toggleNotes(){ notesPanel.classList.toggle('show') }
+function toggleFs(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+}
+
+updateUI();
+
+/* ────────────────────────────────────────────────────────
+   COVER NETWORK ANIMATION
+   ──────────────────────────────────────────────────────── */
+(function(){
+  const edgesG = document.getElementById('netEdges');
+  const nodesG = document.getElementById('netNodes');
+  if(!edgesG) return;
+  const N = 28;
+  const cx=320, cy=320;
+  const nodes = [];
+  for(let i=0;i<N;i++){
+    const r = 130 + Math.random()*150;
+    const a = (i/N)*Math.PI*2 + Math.random()*0.4;
+    nodes.push({x:cx+Math.cos(a)*r, y:cy+Math.sin(a)*r, r:2+Math.random()*3});
+  }
+  // edges: nearest-neighbors
+  nodes.forEach((n,i)=>{
+    const dists = nodes.map((m,j)=>({j, d: Math.hypot(n.x-m.x, n.y-m.y)})).sort((a,b)=>a.d-b.d).slice(1,4);
+    dists.forEach(({j,d})=>{
+      if(d<140 && j>i){
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1',n.x);line.setAttribute('y1',n.y);
+        line.setAttribute('x2',nodes[j].x);line.setAttribute('y2',nodes[j].y);
+        edgesG.appendChild(line);
+      }
+    });
+  });
+  nodes.forEach((n,i)=>{
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',n.x);c.setAttribute('cy',n.y);c.setAttribute('r',n.r);
+    c.setAttribute('fill', i%5===0 ? '#7c5cff' : '#00d9ff');
+    c.setAttribute('opacity', .85);
+    nodesG.appendChild(c);
+    // pulse
+    const ring = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    ring.setAttribute('cx',n.x);ring.setAttribute('cy',n.y);
+    ring.setAttribute('r',n.r);
+    ring.setAttribute('fill','none');
+    ring.setAttribute('stroke','#00d9ff');
+    ring.setAttribute('stroke-width','1');
+    ring.setAttribute('opacity','0');
+    const anim = document.createElementNS('http://www.w3.org/2000/svg','animate');
+    anim.setAttribute('attributeName','r');anim.setAttribute('from',n.r);anim.setAttribute('to',n.r+18);
+    anim.setAttribute('dur', (2.5+Math.random()*2)+'s');anim.setAttribute('repeatCount','indefinite');
+    anim.setAttribute('begin', (Math.random()*3)+'s');
+    const animO = document.createElementNS('http://www.w3.org/2000/svg','animate');
+    animO.setAttribute('attributeName','opacity');animO.setAttribute('from','.7');animO.setAttribute('to','0');
+    animO.setAttribute('dur', (2.5+Math.random()*2)+'s');animO.setAttribute('repeatCount','indefinite');
+    animO.setAttribute('begin', (Math.random()*3)+'s');
+    ring.appendChild(anim);ring.appendChild(animO);
+    nodesG.appendChild(ring);
+  });
+})();
+
+/* ────────────────────────────────────────────────────────
+   PROBLEM SLIDE — MINI GRAPH WITH HIGHLIGHTED PATHS
+   ──────────────────────────────────────────────────────── */
+(function(){
+  const svg = document.getElementById('problemViz');
+  if(!svg) return;
+  // 12 nodes arranged
+  const pts = [];
+  const rings = [
+    {r:0, n:1},
+    {r:60, n:5},
+    {r:120, n:6},
+    {r:170, n:8}
+  ];
+  rings.forEach(({r,n})=>{
+    for(let i=0;i<n;i++){
+      const a = (i/n)*Math.PI*2 + (r===0?0:0.3*r);
+      pts.push({x:200+Math.cos(a)*r, y:200+Math.sin(a)*r});
+    }
+  });
+  // edges - connect to nearest 2-3
+  const edges = [];
+  pts.forEach((p,i)=>{
+    const ds = pts.map((q,j)=>({j, d:Math.hypot(p.x-q.x,p.y-q.y)})).sort((a,b)=>a.d-b.d).slice(1,4);
+    ds.forEach(({j})=>{if(j>i)edges.push([i,j])});
+  });
+  // draw edges
+  edges.forEach(([a,b])=>{
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',pts[a].x);line.setAttribute('y1',pts[a].y);
+    line.setAttribute('x2',pts[b].x);line.setAttribute('y2',pts[b].y);
+    line.setAttribute('stroke','rgba(255,255,255,.12)');line.setAttribute('stroke-width','1');
+    svg.appendChild(line);
+  });
+  // draw nodes
+  pts.forEach((p,i)=>{
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',i===0?6:3.5);
+    c.setAttribute('fill', i===0 ? '#7c5cff' : (i===pts.length-3 ? '#00d9ff' : 'rgba(255,255,255,.35)'));
+    svg.appendChild(c);
+  });
+  // animated highlighted path between center and a peripheral node
+  const target = pts.length-3;
+  // simple BFS for path
+  const adj = {};
+  edges.forEach(([a,b])=>{(adj[a]=adj[a]||[]).push(b);(adj[b]=adj[b]||[]).push(a)});
+  function bfs(s,t){
+    const q=[s], prev={[s]:null};
+    while(q.length){
+      const u = q.shift();
+      if(u===t)break;
+      (adj[u]||[]).forEach(v=>{if(!(v in prev)){prev[v]=u;q.push(v)}});
+    }
+    const path=[];let n=t;while(n!=null){path.push(n);n=prev[n]}
+    return path.reverse();
+  }
+  const path = bfs(0, target);
+  // draw the path as polyline with glow + dash animation
+  const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+  poly.setAttribute('points', path.map(i=>`${pts[i].x},${pts[i].y}`).join(' '));
+  poly.setAttribute('fill','none');
+  poly.setAttribute('stroke','#00d9ff');
+  poly.setAttribute('stroke-width','2.5');
+  poly.setAttribute('stroke-linecap','round');
+  poly.setAttribute('stroke-linejoin','round');
+  poly.style.filter = 'drop-shadow(0 0 6px rgba(0,217,255,.7))';
+  poly.setAttribute('stroke-dasharray','4 6');
+  poly.style.strokeDashoffset = 0;
+  poly.style.animation = 'dashmove 1.6s linear infinite';
+  svg.appendChild(poly);
+
+  // add style for animation
+  const style = document.createElement('style');
+  style.textContent = `@keyframes dashmove { to { stroke-dashoffset: -20 } }`;
+  document.head.appendChild(style);
+})();
+
+/* ────────────────────────────────────────────────────────
+   QUIZ
+   ──────────────────────────────────────────────────────── */
+const QUIZ = [
+  {
+    q: "Combien de stations dans le métro parisien modélisé ici ?",
+    options: [
+      {t:"302 stations", ok:false},
+      {t:"376 stations", ok:true},
+      {t:"473 stations", ok:false},
+      {t:"512 stations", ok:false}
+    ],
+    explain: "<b>376 stations</b> et 473 arêtes. C'est un graphe creux : 473 sur 141 000 cases possibles — d'où le choix d'une liste d'adjacence."
+  },
+  {
+    q: "Pour le plus court chemin, quel algorithme est utilisé ?",
+    options: [
+      {t:"BFS (parcours en largeur)", ok:false},
+      {t:"DFS (parcours en profondeur)", ok:false},
+      {t:"Dijkstra avec tas min", ok:true},
+      {t:"A* avec heuristique", ok:false}
+    ],
+    explain: "<b>Dijkstra</b> avec une file de priorité (heapq). Complexité O((V+E) log V). Le BFS ne fonctionne que si tous les poids sont égaux."
+  },
+  {
+    q: "Prim et Kruskal donnent-ils le même résultat sur ce graphe ?",
+    options: [
+      {t:"Non, c'est très différent", ok:false},
+      {t:"Oui — le même poids total : 20 362 s", ok:true},
+      {t:"Seulement parfois, ça dépend des données", ok:false},
+      {t:"Impossible à dire sans tester", ok:false}
+    ],
+    explain: "<b>Oui — 20 362 s</b> dans les deux cas. Le théorème de l'ACPM garantit l'unicité du poids total (mais pas forcément des arêtes choisies si plusieurs ont le même poids)."
+  }
+];
+
+let qIdx = 0;
+const qText = document.getElementById('qText');
+const qOpts = document.getElementById('qOpts');
+const qExplain = document.getElementById('qExplain');
+const qNum = document.getElementById('qNum');
+const qNext = document.getElementById('qNext');
+const qProg = document.getElementById('qProg');
+
+function renderQuestion(){
+  const q = QUIZ[qIdx];
+  qText.textContent = q.q;
+  qOpts.innerHTML = '';
+  qExplain.classList.remove('show');
+  qNext.style.display = 'none';
+  qNum.textContent = qIdx+1;
+  [...qProg.children].forEach((s,i)=>{
+    s.classList.remove('done','current');
+    if(i<qIdx) s.classList.add('done');
+    else if(i===qIdx) s.classList.add('current');
+  });
+  q.options.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className = 'quiz-opt';
+    b.innerHTML = `<span class="letter">${'ABCD'[i]}</span><span>${opt.t}</span>`;
+    b.onclick = () => answer(b, opt.ok);
+    qOpts.appendChild(b);
+  });
+}
+function answer(btn, ok){
+  [...qOpts.children].forEach(b=>{b.disabled=true});
+  const q = QUIZ[qIdx];
+  [...qOpts.children].forEach((b,i)=>{
+    if(q.options[i].ok) b.classList.add('correct');
+    else if(b===btn && !ok) b.classList.add('wrong');
+  });
+  qExplain.innerHTML = q.explain;
+  qExplain.classList.add('show');
+  if(qIdx<QUIZ.length-1){
+    qNext.style.display = 'inline-flex';
+    qNext.textContent = 'Question suivante →';
+  } else {
+    qNext.style.display = 'inline-flex';
+    qNext.textContent = 'Continuer la présentation →';
+    qNext.onclick = () => next();
+  }
+}
+qNext.onclick = () => {
+  if(qIdx<QUIZ.length-1){ qIdx++; renderQuestion(); }
+  else next();
+};
+renderQuestion();
+</script>
+
+</body>
+</html>

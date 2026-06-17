@@ -4,3 +4,6 @@ pandas
 networkx
 fpdf2
 codecarbon
+folium
+streamlit-folium
+requests

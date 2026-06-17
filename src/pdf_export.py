@@ -18,7 +18,7 @@ class _PDF(FPDF):
         self.cell(0, 8, f"Metro Efrei Dodo - Mohammed El Karchal - EFREI Paris 2026  |  Page {self.page_no()}", align="C")
 
 
-def generer_pdf_trajet(graphe, chemin, duree_totale, depart_nom, arrivee_nom, algo="Dijkstra", t_calcul_ms=0.0):
+def generer_pdf_trajet(graphe, chemin, duree_totale, depart_nom, arrivee_nom, algo="Dijkstra", t_calcul_ms=0.0, co2_data=None):
     """
     Génère un PDF du trajet calculé.
 
@@ -70,6 +70,25 @@ def generer_pdf_trajet(graphe, chemin, duree_totale, depart_nom, arrivee_nom, al
     pdf.set_text_color(130, 130, 160)
     pdf.cell(0, 5, f"Temps de calcul : {t_calcul_ms:.2f} ms", ln=True)
     pdf.ln(4)
+
+    # ── Impact environnemental (si fourni) ───────────────────────────────────
+    if co2_data:
+        pdf.ln(2)
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_text_color(0, 100, 60)
+        pdf.cell(0, 7, "Impact environnemental", ln=True)
+        pdf.set_font("Helvetica", "", 9)
+        pdf.set_text_color(60, 60, 90)
+        pdf.cell(0, 5,
+                 f"Distance estimee : {co2_data['distance_km']:.1f} km  |  "
+                 f"CO2 metro : {co2_data['co2_metro_g']:.1f} g  |  "
+                 f"CO2 voiture : {co2_data['co2_voiture_g']:.0f} g  |  "
+                 f"Economie : {co2_data['economie_g']:.0f} g (x{co2_data['ratio']:.0f})",
+                 ln=True)
+        pdf.set_font("Helvetica", "I", 7)
+        pdf.set_text_color(140, 140, 160)
+        pdf.cell(0, 4, "Sources : ADEME 2023 - metro 4.1 gCO2eq/km, voiture 120 g/km", ln=True)
+        pdf.ln(2)
 
     # ── Ligne de séparation ──────────────────────────────────────────────────
     pdf.set_draw_color(200, 200, 220)
