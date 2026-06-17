@@ -288,14 +288,14 @@ col_a, col_b = st.columns(2)
 with col_a:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Dijkstra</div>', unsafe_allow_html=True)
-    st.markdown("""
+    st.markdown(f"""
 <p style="color:#46527a;font-size:0.93rem;line-height:1.7;">
 Explore tous les noeuds par ordre de distance croissante depuis la source.
 <br><br>
 <strong style="color:#0a1f44">Optimal :</strong> toujours trouve le chemin le plus court.<br>
-<strong style="color:#ef9a9a">Lent :</strong> explore des zones inutiles loin de la destination.
+<strong style="color:#dc2626">Lent :</strong> explore des zones inutiles loin de la destination.
 <br><br>
-Complexité : <span class="complexity">O((S + A) · log S)</span>
+Complexité : {theme.COMPLEXITES['dijkstra_t']}
 </p>
 """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -303,19 +303,29 @@ Complexité : <span class="complexity">O((S + A) · log S)</span>
 with col_b:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">A* (A-star)</div>', unsafe_allow_html=True)
-    st.markdown("""
+    st.markdown(f"""
 <p style="color:#46527a;font-size:0.93rem;line-height:1.7;">
-Ajoute une <strong style="color:#0a1f44">heuristique h(n)</strong> = distance euclidienne vers la destination,
-multipliée par un facteur admissible (min temps/pixel sur le graphe).
+Ajoute une <strong style="color:#0a1f44">heuristique
+<span class="math"><i>h</i>(<i>n</i>)</span></strong> = distance euclidienne vers la
+destination, multipliée par un facteur admissible (min temps/pixel sur le graphe).
 <br><br>
-<strong style="color:#0a1f44">Formule :</strong> f(n) = g(n) + h(n)
-<br>
-g(n) = coût réel depuis la source · h(n) = estimation du reste
+<strong style="color:#0a1f44">Fonction d'évaluation :</strong>
+</p>
+<div style="text-align:center;margin:0.1rem 0 0.5rem;">
+<span class="math" style="font-size:1.2em;">
+  <i>f</i>(<i>n</i>) = <i>g</i>(<i>n</i>) + <i>h</i>(<i>n</i>)
+</span>
+</div>
+<p style="color:#46527a;font-size:0.93rem;line-height:1.7;">
+<span class="math"><i>g</i>(<i>n</i>)</span> = coût réel depuis la source ·
+<span class="math"><i>h</i>(<i>n</i>)</span> = estimation (minorante) du reste
 <br><br>
-<strong style="color:#a5d6a7">Plus rapide :</strong> explore moins de noeuds.<br>
-<strong style="color:#0a1f44">Optimal :</strong> garantie si h est admissible (ne surestime jamais).
+<strong style="color:#00935f">Plus rapide :</strong> explore moins de noeuds.<br>
+<strong style="color:#0a1f44">Optimal :</strong> garanti si
+<span class="math"><i>h</i></span> est admissible, c.-à-d.
+<span class="math"><i>h</i>(<i>n</i>) ≤ <i>h</i>*(<i>n</i>)</span> (ne surestime jamais).
 <br><br>
-Complexité : <span class="complexity">O((S + A) · log S)</span> (même pire cas, meilleur en pratique)
+Complexité : {theme.COMPLEXITES['astar_t']} <span style="color:#8b95b4;">(même pire cas que Dijkstra, meilleur en pratique)</span>
 </p>
 """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -327,16 +337,45 @@ Complexité : <span class="complexity">O((S + A) · log S)</span> (même pire ca
 st.markdown("---")
 st.subheader("4 · Tableau comparatif des algorithmes")
 
-import pandas as pd
-df_algos = pd.DataFrame([
-    {"Algorithme": "BFS", "Problème résolu": "Connexité du graphe", "Complexité temps": "O(S + A)", "Complexité espace": "O(S)", "Poids pris en compte": "Non"},
-    {"Algorithme": "Dijkstra", "Problème résolu": "Plus court chemin", "Complexité temps": "O((S+A) log S)", "Complexité espace": "O(S)", "Poids pris en compte": "Oui"},
-    {"Algorithme": "A*", "Problème résolu": "Plus court chemin (guidé)", "Complexité temps": "O((S+A) log S)", "Complexité espace": "O(S)", "Poids pris en compte": "Oui"},
-    {"Algorithme": "Prim", "Problème résolu": "Arbre couvrant minimum", "Complexité temps": "O(A log S)", "Complexité espace": "O(S + A)", "Poids pris en compte": "Oui"},
-    {"Algorithme": "Kruskal", "Problème résolu": "Arbre couvrant minimum", "Complexité temps": "O(A log A)", "Complexité espace": "O(S + A)", "Poids pris en compte": "Oui"},
-])
-st.dataframe(df_algos, use_container_width=True, hide_index=True)
-st.caption("S = nombre de sommets (stations), A = nombre d'arêtes (liaisons). Complexités pour un graphe connexe.")
+C = theme.COMPLEXITES
+_rows = [
+    ("BFS",      "Connexité du graphe",          C["bfs_t"],      C["bfs_s"],      "Non"),
+    ("Dijkstra", "Plus court chemin",            C["dijkstra_t"], C["dijkstra_s"], "Oui"),
+    ("A*",       "Plus court chemin (guidé)",    C["astar_t"],    C["astar_s"],    "Oui"),
+    ("Prim",     "Arbre couvrant minimum",       C["prim_t"],     C["prim_s"],     "Oui"),
+    ("Kruskal",  "Arbre couvrant minimum",       C["kruskal_t"],  C["kruskal_s"],  "Oui"),
+]
+_body = ""
+for i, (algo, pb, ct, cs, w) in enumerate(_rows):
+    bg = "background:rgba(10,31,68,0.03);" if i % 2 else ""
+    wcol = "#00935f" if w == "Oui" else "#8b95b4"
+    _body += (
+        f'<tr style="{bg}border-bottom:1px solid rgba(10,31,68,0.07);">'
+        f'<td style="padding:8px 12px;font-weight:700;color:#003688;">{algo}</td>'
+        f'<td style="padding:8px 12px;">{pb}</td>'
+        f'<td style="padding:8px 12px;text-align:center;">{ct}</td>'
+        f'<td style="padding:8px 12px;text-align:center;">{cs}</td>'
+        f'<td style="padding:8px 12px;text-align:center;color:{wcol};font-weight:600;">{w}</td>'
+        f'</tr>'
+    )
+st.markdown(f"""
+<div class="card">
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+<thead><tr style="border-bottom:2px solid rgba(0,54,136,0.3);">
+  <th style="padding:8px 12px;color:#46527a;text-align:left;">Algorithme</th>
+  <th style="padding:8px 12px;color:#46527a;text-align:left;">Problème résolu</th>
+  <th style="padding:8px 12px;color:#46527a;text-align:center;">Complexité temps</th>
+  <th style="padding:8px 12px;color:#46527a;text-align:center;">Complexité espace</th>
+  <th style="padding:8px 12px;color:#46527a;text-align:center;">Pondéré</th>
+</tr></thead>
+<tbody>{_body}</tbody>
+</table>
+<p style="margin:0.7rem 0 0;font-size:0.78rem;color:#8b95b4;">
+  <i>S</i> = nombre de sommets (stations) · <i>A</i> = nombre d'arêtes (liaisons) ·
+  complexités pour un graphe connexe avec tas binaire.
+</p>
+</div>
+""", unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # SECTION 5 — ACPM

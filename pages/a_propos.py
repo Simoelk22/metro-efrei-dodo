@@ -5,6 +5,8 @@ import streamlit as st
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from src import theme
+
 # Le thème global (signalétique RATP claire) fournit déjà toutes les classes
 # utilisées ici (.card, .profile-img, .badge, .section-title, .body-text,
 # .skill-bar-*, .contact-link, .algo-tag, .quote) — voir src/theme.py.
@@ -72,9 +74,9 @@ L'application modélise le réseau du métro parisien sous forme de <strong styl
 """, unsafe_allow_html=True)
 
 cols_algos = [
-    ("Dijkstra", "Plus court chemin entre deux stations — O((S + A) log S)"),
-    ("Prim", "Arbre couvrant de poids minimal — O(A log S)"),
-    ("Kruskal", "Même résultat, autre approche — O(A log A)"),
+    ("Dijkstra", f"Plus court chemin entre deux stations — {theme.COMPLEXITES['dijkstra_t']}"),
+    ("Prim", f"Arbre couvrant de poids minimal — {theme.COMPLEXITES['prim_t']}"),
+    ("Kruskal", f"Même résultat, autre approche — {theme.COMPLEXITES['kruskal_t']}"),
     ("BFS", "Vérification de la connexité du réseau"),
 ]
 for nom, desc in cols_algos:

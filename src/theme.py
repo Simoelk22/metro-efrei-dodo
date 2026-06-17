@@ -366,6 +366,28 @@ hr {{ border-color: {c['line']}; }}
     color: {c['navy']};
     font-size: 0.86em;
 }}
+
+/* Typographie mathématique (notation académique, façon manuel/LaTeX) */
+.math {{
+    font-family: 'STIX Two Math', 'Cambria Math', 'Latin Modern Math',
+                 'Asana Math', 'Georgia', serif;
+    font-size: 1.08em;
+    line-height: 1.4;
+    white-space: nowrap;
+    color: inherit;
+}}
+.math i, .math em {{ font-style: italic; }}
+/* Variante « complexité » : pastille discrète bleu navy */
+.math.cx {{
+    color: {c['navy']};
+    background: rgba(0,54,136,0.06);
+    border: 1px solid rgba(0,54,136,0.12);
+    border-radius: 7px;
+    padding: 0.06rem 0.5rem;
+    font-weight: 500;
+}}
+.math sub, .math sup {{ font-size: 0.72em; }}
+.math .op {{ padding: 0 0.18em; }}     /* opérateurs : + − = */
 .card pre {{
     background: {c['ink']} !important;
     color: #d7e3ff !important;
@@ -612,6 +634,54 @@ def load_image_b64(path: str) -> str:
         return ""
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
+
+
+# ════════════════════════════════════════════════════════════════════════════
+#  NOTATION MATHÉMATIQUE
+# ════════════════════════════════════════════════════════════════════════════
+#
+# Convention (cohérente dans toute l'application) :
+#   S  = nombre de sommets (stations)  — scalaire
+#   A  = nombre d'arêtes  (liaisons)   — scalaire
+#   V  = ensemble des sommets, E = ensemble des arêtes (définition formelle)
+#
+# Les variables sont en italique, les opérateurs (O, log, +, =) restent droits,
+# comme dans la composition mathématique classique (LaTeX / manuels).
+
+_THIN = " "  # espace fine (thin space)
+
+
+def m(inner: str, *, cx: bool = False) -> str:
+    """Enveloppe une expression dans la typographie mathématique.
+
+    Args:
+        inner : HTML de l'expression (variables en <i>…</i>).
+        cx    : si True, rend une pastille « complexité » bleu navy.
+    """
+    cls = "math cx" if cx else "math"
+    return f'<span class="{cls}">{inner}</span>'
+
+
+def _bigO(inner: str, *, cx: bool = True) -> str:
+    """Notation grand-O : O(<expression>)."""
+    return m(f"O({inner})", cx=cx)
+
+
+# Complexités de référence (HTML prêt à insérer). « log » est la base implicite
+# usuelle en algorithmique ; les facteurs sont écrits sans signe de produit,
+# selon l'usage : (S + A) log S.
+COMPLEXITES = {
+    "bfs_t":      _bigO(f"<i>S</i> + <i>A</i>"),
+    "bfs_s":      _bigO("<i>S</i>"),
+    "dijkstra_t": _bigO(f"(<i>S</i> + <i>A</i>){_THIN}log{_THIN}<i>S</i>"),
+    "dijkstra_s": _bigO("<i>S</i>"),
+    "astar_t":    _bigO(f"(<i>S</i> + <i>A</i>){_THIN}log{_THIN}<i>S</i>"),
+    "astar_s":    _bigO("<i>S</i>"),
+    "prim_t":     _bigO(f"<i>A</i>{_THIN}log{_THIN}<i>S</i>"),
+    "prim_s":     _bigO(f"<i>S</i> + <i>A</i>"),
+    "kruskal_t":  _bigO(f"<i>A</i>{_THIN}log{_THIN}<i>A</i>"),
+    "kruskal_s":  _bigO(f"<i>S</i> + <i>A</i>"),
+}
 
 
 # ════════════════════════════════════════════════════════════════════════════

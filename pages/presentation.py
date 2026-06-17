@@ -87,13 +87,25 @@ et implémente plusieurs algorithmes de recherche de chemin pour le résoudre.
         st.markdown("""
 <div class="card">
 <h3 style="margin-top:0;color:#46527a;">Formulation mathématique</h3>
-<p>
-G = (V, E, w) où :<br>
-• <b>V</b> = stations (sommets)<br>
-• <b>E</b> = liaisons directes (arêtes)<br>
-• <b>w(u,v)</b> = temps de trajet en secondes (poids)<br><br>
-Objectif : trouver le chemin P de s à t tel que <b>Σ w(e) est minimal</b>.
+<p style="line-height:1.95;">
+On modélise le réseau par un graphe pondéré
+<span class="math"><i>G</i> = (<i>V</i>, <i>E</i>, <i>w</i>)</span> où :<br>
+• <span class="math"><i>V</i></span> = ensemble des stations (sommets)<br>
+• <span class="math"><i>E</i> ⊆ <i>V</i> × <i>V</i></span> = liaisons directes (arêtes)<br>
+• <span class="math"><i>w</i> : <i>E</i> → ℝ<sub>+</sub></span>,
+  <span class="math"><i>w</i>(<i>u</i>, <i>v</i>)</span> = temps de trajet en secondes<br><br>
+<b>Objectif.</b> Pour une source <span class="math"><i>s</i></span> et une cible
+<span class="math"><i>t</i></span>, trouver un chemin
+<span class="math"><i>P</i> = (<i>s</i> = <i>v</i><sub>0</sub>, <i>v</i><sub>1</sub>, …, <i>v</i><sub>k</sub> = <i>t</i>)</span>
+minimisant le coût total :
 </p>
+<div style="text-align:center;margin:0.2rem 0 0.3rem;">
+<span class="math" style="font-size:1.25em;">
+  <i>W</i>(<i>P</i>) = ∑<sub><i>i</i>=0</sub><sup><i>k</i>−1</sup>
+  <i>w</i>(<i>v<sub>i</sub></i>, <i>v</i><sub><i>i</i>+1</sub>)
+  &nbsp;⟶&nbsp; min
+</span>
+</div>
 </div>
         """, unsafe_allow_html=True)
 
@@ -244,57 +256,65 @@ elif slide == SLIDES[2]:
     st.markdown("## Algorithmes de graphe")
 
     # ── Tableau comparatif ────────────────────────────────────────────────────
-    st.markdown("""
+    C = theme.COMPLEXITES
+    _th = "padding:8px 12px;color:#46527a;"
+    _td = "padding:8px 12px;"
+    _algo = "padding:8px 12px;font-weight:700;color:#003688;"
+    _cx = "padding:8px 12px;text-align:center;"
+    st.markdown(f"""
 <div class="card">
 <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
 <thead>
 <tr style="border-bottom:2px solid rgba(0,54,136,0.3);">
-  <th style="padding:8px 12px;color:#46527a;text-align:left;">Algorithme</th>
-  <th style="padding:8px 12px;color:#46527a;text-align:left;">Problème résolu</th>
-  <th style="padding:8px 12px;color:#46527a;text-align:center;">Complexité temps</th>
-  <th style="padding:8px 12px;color:#46527a;text-align:center;">Complexité espace</th>
-  <th style="padding:8px 12px;color:#46527a;text-align:left;">Technique clé</th>
+  <th style="{_th}text-align:left;">Algorithme</th>
+  <th style="{_th}text-align:left;">Problème résolu</th>
+  <th style="{_th}text-align:center;">Complexité temps</th>
+  <th style="{_th}text-align:center;">Complexité espace</th>
+  <th style="{_th}text-align:left;">Technique clé</th>
 </tr>
 </thead>
 <tbody>
 <tr style="border-bottom:1px solid rgba(10,31,68,0.07);">
-  <td style="padding:8px 12px;font-weight:700;color:#003688;">BFS</td>
-  <td style="padding:8px 12px;">Connexité du graphe</td>
-  <td style="padding:8px 12px;text-align:center;font-family:monospace;color:#1d6cf2;">O(S + A)</td>
-  <td style="padding:8px 12px;text-align:center;font-family:monospace;color:#1d6cf2;">O(S)</td>
-  <td style="padding:8px 12px;">File FIFO, marquage visité</td>
+  <td style="{_algo}">BFS</td>
+  <td style="{_td}">Connexité du graphe</td>
+  <td style="{_cx}">{C['bfs_t']}</td>
+  <td style="{_cx}">{C['bfs_s']}</td>
+  <td style="{_td}">File FIFO, marquage visité</td>
 </tr>
 <tr style="background:rgba(10,31,68,0.03);border-bottom:1px solid rgba(10,31,68,0.07);">
-  <td style="padding:8px 12px;font-weight:700;color:#003688;">Dijkstra</td>
-  <td style="padding:8px 12px;">Plus court chemin (source unique)</td>
-  <td style="padding:8px 12px;text-align:center;font-family:monospace;color:#1d6cf2;">O((S+A) log S)</td>
-  <td style="padding:8px 12px;text-align:center;font-family:monospace;color:#1d6cf2;">O(S)</td>
-  <td style="padding:8px 12px;">Tas min (heapq), relaxation</td>
+  <td style="{_algo}">Dijkstra</td>
+  <td style="{_td}">Plus court chemin (source unique)</td>
+  <td style="{_cx}">{C['dijkstra_t']}</td>
+  <td style="{_cx}">{C['dijkstra_s']}</td>
+  <td style="{_td}">Tas min (heapq), relaxation</td>
 </tr>
 <tr style="border-bottom:1px solid rgba(10,31,68,0.07);">
-  <td style="padding:8px 12px;font-weight:700;color:#003688;">A*</td>
-  <td style="padding:8px 12px;">Plus court chemin (guidé)</td>
-  <td style="padding:8px 12px;text-align:center;font-family:monospace;color:#1d6cf2;">O((S+A) log S)</td>
-  <td style="padding:8px 12px;text-align:center;font-family:monospace;color:#1d6cf2;">O(S)</td>
-  <td style="padding:8px 12px;">Dijkstra + heuristique euclidienne</td>
+  <td style="{_algo}">A*</td>
+  <td style="{_td}">Plus court chemin (guidé)</td>
+  <td style="{_cx}">{C['astar_t']}</td>
+  <td style="{_cx}">{C['astar_s']}</td>
+  <td style="{_td}">Dijkstra + heuristique euclidienne</td>
 </tr>
 <tr style="background:rgba(10,31,68,0.03);border-bottom:1px solid rgba(10,31,68,0.07);">
-  <td style="padding:8px 12px;font-weight:700;color:#003688;">Prim</td>
-  <td style="padding:8px 12px;">Arbre couvrant minimal</td>
-  <td style="padding:8px 12px;text-align:center;font-family:monospace;color:#1d6cf2;">O(A log S)</td>
-  <td style="padding:8px 12px;text-align:center;font-family:monospace;color:#1d6cf2;">O(S + A)</td>
-  <td style="padding:8px 12px;">Glouton, extension locale</td>
+  <td style="{_algo}">Prim</td>
+  <td style="{_td}">Arbre couvrant minimal</td>
+  <td style="{_cx}">{C['prim_t']}</td>
+  <td style="{_cx}">{C['prim_s']}</td>
+  <td style="{_td}">Glouton, extension locale</td>
 </tr>
 <tr>
-  <td style="padding:8px 12px;font-weight:700;color:#003688;">Kruskal</td>
-  <td style="padding:8px 12px;">Arbre couvrant minimal</td>
-  <td style="padding:8px 12px;text-align:center;font-family:monospace;color:#1d6cf2;">O(A log A)</td>
-  <td style="padding:8px 12px;text-align:center;font-family:monospace;color:#1d6cf2;">O(S + A)</td>
-  <td style="padding:8px 12px;">Tri + Union-Find</td>
+  <td style="{_algo}">Kruskal</td>
+  <td style="{_td}">Arbre couvrant minimal</td>
+  <td style="{_cx}">{C['kruskal_t']}</td>
+  <td style="{_cx}">{C['kruskal_s']}</td>
+  <td style="{_td}">Tri + Union-Find</td>
 </tr>
 </tbody>
 </table>
-<p style="margin:0.5rem 0 0;font-size:0.78rem;color:#8b95b4;">S = nb sommets · A = nb arêtes · Tous implémentés from scratch sans NetworkX</p>
+<p style="margin:0.7rem 0 0;font-size:0.78rem;color:#8b95b4;">
+  <i>S</i> = nombre de sommets (stations) · <i>A</i> = nombre d'arêtes (liaisons) ·
+  complexités pour un graphe connexe, tas binaire · implémentés sans NetworkX
+</p>
 </div>
     """, unsafe_allow_html=True)
 
@@ -323,7 +343,7 @@ même pour un trajet court.
 <p class="section-label">A* — Guidé par l'heuristique</p>
 <p style="line-height:1.7;font-size:0.9rem;">
 Ajoute une <b>estimation de distance</b> euclidienne vers l'arrivée.
-Le tas contient <code>f = g + h</code> : coût réel + estimation admissible.
+Le tas est ordonné par <span class="math"><i>f</i>(<i>n</i>) = <i>g</i>(<i>n</i>) + <i>h</i>(<i>n</i>)</span> : coût réel + estimation admissible.
 </p>
 <p style="color:#00935f;font-size:0.88rem;margin-bottom:0;">
 ✓ Explore <b>significativement moins de nœuds</b> en guidant
@@ -582,7 +602,7 @@ elif slide == SLIDES[4]:
 </div>
 <div class="check-item">
   <span>🔗</span>
-  <span>Expliquer : <b>BFS en O(S+A)</b>, visite tous les sommets accessibles</span>
+  <span>Expliquer : <b>BFS en</b> <span class="math">O(<i>S</i> + <i>A</i>)</span>, visite tous les sommets accessibles</span>
 </div>
 </div>
         """, unsafe_allow_html=True)
@@ -600,7 +620,7 @@ elif slide == SLIDES[4]:
 </div>
 <div class="check-item">
   <span>🌲</span>
-  <span>Expliquer Union-Find pour Kruskal (complexité O(A log A))</span>
+  <span>Expliquer Union-Find pour Kruskal (complexité <span class="math">O(<i>A</i> log <i>A</i>)</span>)</span>
 </div>
 </div>
         """, unsafe_allow_html=True)
@@ -661,9 +681,10 @@ elif slide == SLIDES[4]:
     Prim ou Kruskal, lequel est meilleur ?
   </summary>
   <p style="margin-top:0.5rem;font-size:0.88rem;line-height:1.6;">
-    Dépend du graphe. Prim est efficace sur les graphes denses (O(A log S)),
-    Kruskal sur les graphes creux (O(A log A)). Notre réseau de métro est creux
-    (A ≈ 2S), donc les deux ont des performances similaires.
+    Dépend du graphe. Prim est efficace sur les graphes denses
+    (<span class="math">O(<i>A</i> log <i>S</i>)</span>), Kruskal sur les graphes creux
+    (<span class="math">O(<i>A</i> log <i>A</i>)</span>). Notre réseau de métro est creux
+    (<span class="math"><i>A</i> ≈ 2<i>S</i></span>), donc les deux ont des performances similaires.
   </p>
 </details>
 <details style="cursor:pointer;">
