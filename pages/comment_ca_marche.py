@@ -337,45 +337,20 @@ Complexité : {theme.COMPLEXITES['astar_t']} <span style="color:#8b95b4;">(même
 st.markdown("---")
 st.subheader("4 · Tableau comparatif des algorithmes")
 
-C = theme.COMPLEXITES
-_rows = [
-    ("BFS",      "Connexité du graphe",          C["bfs_t"],      C["bfs_s"],      "Non"),
-    ("Dijkstra", "Plus court chemin",            C["dijkstra_t"], C["dijkstra_s"], "Oui"),
-    ("A*",       "Plus court chemin (guidé)",    C["astar_t"],    C["astar_s"],    "Oui"),
-    ("Prim",     "Arbre couvrant minimum",       C["prim_t"],     C["prim_s"],     "Oui"),
-    ("Kruskal",  "Arbre couvrant minimum",       C["kruskal_t"],  C["kruskal_s"],  "Oui"),
-]
-_body = ""
-for i, (algo, pb, ct, cs, w) in enumerate(_rows):
-    bg = "background:rgba(10,31,68,0.03);" if i % 2 else ""
-    wcol = "#00935f" if w == "Oui" else "#8b95b4"
-    _body += (
-        f'<tr style="{bg}border-bottom:1px solid rgba(10,31,68,0.07);">'
-        f'<td style="padding:8px 12px;font-weight:700;color:#003688;">{algo}</td>'
-        f'<td style="padding:8px 12px;">{pb}</td>'
-        f'<td style="padding:8px 12px;text-align:center;">{ct}</td>'
-        f'<td style="padding:8px 12px;text-align:center;">{cs}</td>'
-        f'<td style="padding:8px 12px;text-align:center;color:{wcol};font-weight:600;">{w}</td>'
-        f'</tr>'
-    )
-st.markdown(f"""
-<div class="card">
-<table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
-<thead><tr style="border-bottom:2px solid rgba(0,54,136,0.3);">
-  <th style="padding:8px 12px;color:#46527a;text-align:left;">Algorithme</th>
-  <th style="padding:8px 12px;color:#46527a;text-align:left;">Problème résolu</th>
-  <th style="padding:8px 12px;color:#46527a;text-align:center;">Complexité temps</th>
-  <th style="padding:8px 12px;color:#46527a;text-align:center;">Complexité espace</th>
-  <th style="padding:8px 12px;color:#46527a;text-align:center;">Pondéré</th>
-</tr></thead>
-<tbody>{_body}</tbody>
-</table>
-<p style="margin:0.7rem 0 0;font-size:0.78rem;color:#8b95b4;">
-  <i>S</i> = nombre de sommets (stations) · <i>A</i> = nombre d'arêtes (liaisons) ·
-  complexités pour un graphe connexe avec tas binaire.
-</p>
-</div>
-""", unsafe_allow_html=True)
+T = theme.COMPLEXITES_TEX
+st.markdown(
+    "| Algorithme | Problème résolu | Complexité temps | Complexité espace | Pondéré |\n"
+    "|:--|:--|:--:|:--:|:--:|\n"
+    f"| **BFS** | Connexité du graphe | {T['bfs_t']} | {T['bfs_s']} | Non |\n"
+    f"| **Dijkstra** | Plus court chemin | {T['dijkstra_t']} | {T['dijkstra_s']} | Oui |\n"
+    f"| **A\\*** | Plus court chemin (guidé) | {T['astar_t']} | {T['astar_s']} | Oui |\n"
+    f"| **Prim** | Arbre couvrant minimum | {T['prim_t']} | {T['prim_s']} | Oui |\n"
+    f"| **Kruskal** | Arbre couvrant minimum | {T['kruskal_t']} | {T['kruskal_s']} | Oui |\n"
+)
+st.caption(
+    "S = nombre de sommets (stations), A = nombre d'arêtes (liaisons). "
+    "Complexités pour un graphe connexe avec tas binaire."
+)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # SECTION 5 — ACPM

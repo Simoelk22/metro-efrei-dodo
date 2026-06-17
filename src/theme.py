@@ -388,6 +388,40 @@ hr {{ border-color: {c['line']}; }}
 }}
 .math sub, .math sup {{ font-size: 0.72em; }}
 .math .op {{ padding: 0 0.18em; }}     /* opérateurs : + − = */
+
+/* Tableaux Markdown stylés comme des cartes (rendu KaTeX dans les cellules) */
+.stMarkdown table {{
+    width: 100%;
+    border-collapse: collapse;
+    background: {c['surface']};
+    border: 1px solid {c['line']};
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(16,38,76,0.06);
+    font-size: 0.9rem;
+}}
+.stMarkdown table thead th {{
+    background: {c['surface_2']};
+    color: {c['ink_2']} !important;
+    font-weight: 700;
+    text-align: left;
+    padding: 11px 14px;
+    border-bottom: 2px solid rgba(0,54,136,0.25);
+}}
+.stMarkdown table tbody td {{
+    padding: 10px 14px;
+    border-bottom: 1px solid {c['line']};
+    color: {c['ink_2']};
+}}
+.stMarkdown table tbody tr:nth-child(even) {{ background: rgba(10,31,68,0.025); }}
+.stMarkdown table tbody tr:hover {{ background: rgba(29,108,242,0.05); }}
+.stMarkdown table tbody td:first-child {{ font-weight: 700; color: {c['navy']}; }}
+/* Math KaTeX dans les cellules de complexité → bleu navy, pastille douce */
+.stMarkdown table .katex {{
+    color: {c['navy']};
+    font-size: 1.04em;
+}}
+.stMarkdown table td:has(.katex) {{ text-align: center; white-space: nowrap; }}
 .card pre {{
     background: {c['ink']} !important;
     color: #d7e3ff !important;
@@ -681,6 +715,21 @@ COMPLEXITES = {
     "prim_s":     _bigO(f"<i>S</i> + <i>A</i>"),
     "kruskal_t":  _bigO(f"<i>A</i>{_THIN}log{_THIN}<i>A</i>"),
     "kruskal_s":  _bigO(f"<i>S</i> + <i>A</i>"),
+}
+
+# Version LaTeX (rendu KaTeX natif de Streamlit, via $…$ dans les tableaux
+# Markdown). C'est la composition mathématique « vraie » (Computer Modern).
+COMPLEXITES_TEX = {
+    "bfs_t":      r"$\mathcal{O}(S + A)$",
+    "bfs_s":      r"$\mathcal{O}(S)$",
+    "dijkstra_t": r"$\mathcal{O}\!\big((S + A)\,\log S\big)$",
+    "dijkstra_s": r"$\mathcal{O}(S)$",
+    "astar_t":    r"$\mathcal{O}\!\big((S + A)\,\log S\big)$",
+    "astar_s":    r"$\mathcal{O}(S)$",
+    "prim_t":     r"$\mathcal{O}(A\,\log S)$",
+    "prim_s":     r"$\mathcal{O}(S + A)$",
+    "kruskal_t":  r"$\mathcal{O}(A\,\log A)$",
+    "kruskal_s":  r"$\mathcal{O}(S + A)$",
 }
 
 

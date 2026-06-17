@@ -255,68 +255,21 @@ elif slide == SLIDES[2]:
     st.markdown('<p class="section-label">Les 5 algorithmes implémentés</p>', unsafe_allow_html=True)
     st.markdown("## Algorithmes de graphe")
 
-    # ── Tableau comparatif ────────────────────────────────────────────────────
-    C = theme.COMPLEXITES
-    _th = "padding:8px 12px;color:#46527a;"
-    _td = "padding:8px 12px;"
-    _algo = "padding:8px 12px;font-weight:700;color:#003688;"
-    _cx = "padding:8px 12px;text-align:center;"
-    st.markdown(f"""
-<div class="card">
-<table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
-<thead>
-<tr style="border-bottom:2px solid rgba(0,54,136,0.3);">
-  <th style="{_th}text-align:left;">Algorithme</th>
-  <th style="{_th}text-align:left;">Problème résolu</th>
-  <th style="{_th}text-align:center;">Complexité temps</th>
-  <th style="{_th}text-align:center;">Complexité espace</th>
-  <th style="{_th}text-align:left;">Technique clé</th>
-</tr>
-</thead>
-<tbody>
-<tr style="border-bottom:1px solid rgba(10,31,68,0.07);">
-  <td style="{_algo}">BFS</td>
-  <td style="{_td}">Connexité du graphe</td>
-  <td style="{_cx}">{C['bfs_t']}</td>
-  <td style="{_cx}">{C['bfs_s']}</td>
-  <td style="{_td}">File FIFO, marquage visité</td>
-</tr>
-<tr style="background:rgba(10,31,68,0.03);border-bottom:1px solid rgba(10,31,68,0.07);">
-  <td style="{_algo}">Dijkstra</td>
-  <td style="{_td}">Plus court chemin (source unique)</td>
-  <td style="{_cx}">{C['dijkstra_t']}</td>
-  <td style="{_cx}">{C['dijkstra_s']}</td>
-  <td style="{_td}">Tas min (heapq), relaxation</td>
-</tr>
-<tr style="border-bottom:1px solid rgba(10,31,68,0.07);">
-  <td style="{_algo}">A*</td>
-  <td style="{_td}">Plus court chemin (guidé)</td>
-  <td style="{_cx}">{C['astar_t']}</td>
-  <td style="{_cx}">{C['astar_s']}</td>
-  <td style="{_td}">Dijkstra + heuristique euclidienne</td>
-</tr>
-<tr style="background:rgba(10,31,68,0.03);border-bottom:1px solid rgba(10,31,68,0.07);">
-  <td style="{_algo}">Prim</td>
-  <td style="{_td}">Arbre couvrant minimal</td>
-  <td style="{_cx}">{C['prim_t']}</td>
-  <td style="{_cx}">{C['prim_s']}</td>
-  <td style="{_td}">Glouton, extension locale</td>
-</tr>
-<tr>
-  <td style="{_algo}">Kruskal</td>
-  <td style="{_td}">Arbre couvrant minimal</td>
-  <td style="{_cx}">{C['kruskal_t']}</td>
-  <td style="{_cx}">{C['kruskal_s']}</td>
-  <td style="{_td}">Tri + Union-Find</td>
-</tr>
-</tbody>
-</table>
-<p style="margin:0.7rem 0 0;font-size:0.78rem;color:#8b95b4;">
-  <i>S</i> = nombre de sommets (stations) · <i>A</i> = nombre d'arêtes (liaisons) ·
-  complexités pour un graphe connexe, tas binaire · implémentés sans NetworkX
-</p>
-</div>
-    """, unsafe_allow_html=True)
+    # ── Tableau comparatif (vraie composition mathématique : KaTeX) ───────────
+    T = theme.COMPLEXITES_TEX
+    st.markdown(
+        "| Algorithme | Problème résolu | Complexité temps | Complexité espace | Technique clé |\n"
+        "|:--|:--|:--:|:--:|:--|\n"
+        f"| **BFS** | Connexité du graphe | {T['bfs_t']} | {T['bfs_s']} | File FIFO, marquage visité |\n"
+        f"| **Dijkstra** | Plus court chemin (source unique) | {T['dijkstra_t']} | {T['dijkstra_s']} | Tas min (heapq), relaxation |\n"
+        f"| **A\\*** | Plus court chemin (guidé) | {T['astar_t']} | {T['astar_s']} | Dijkstra + heuristique euclidienne |\n"
+        f"| **Prim** | Arbre couvrant minimal | {T['prim_t']} | {T['prim_s']} | Glouton, extension locale |\n"
+        f"| **Kruskal** | Arbre couvrant minimal | {T['kruskal_t']} | {T['kruskal_s']} | Tri + Union-Find |\n"
+    )
+    st.caption(
+        "S = nombre de sommets (stations) · A = nombre d'arêtes (liaisons) · "
+        "complexités pour un graphe connexe avec tas binaire · implémentés sans NetworkX."
+    )
 
     # ── Avantage de A* sur Dijkstra ───────────────────────────────────────────
     col1, col2 = st.columns(2)
